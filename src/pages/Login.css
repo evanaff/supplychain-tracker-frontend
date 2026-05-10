@@ -1,0 +1,149 @@
+.login-page {
+  width: 100%;
+  min-height: calc(100vh - 80px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 520px;
+
+  background-color: #f5f5f5;
+
+  border: 2px solid #00cfff;
+  border-radius: 16px;
+
+  padding: 48px 32px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 20px;
+}
+
+.login-title {
+  font-size: 24px;
+  font-weight: 500;
+
+  color: #1f1f1f;
+}
+
+.wallet-box {
+  width: 100%;
+
+  background-color: #a8e7e7;
+
+  border-radius: 10px;
+
+  padding: 22px 20px;
+
+  text-align: center;
+}
+
+.wallet-placeholder {
+  font-size: 18px;
+  color: #4e4e4e;
+}
+
+.wallet-address {
+  font-size: 18px;
+  color: #444;
+}
+
+.connect-button {
+  background-color: #7b7b7b;
+  color: white;
+
+  border: none;
+  border-radius: 8px;
+
+  padding: 10px 20px;
+
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+.connect-button:hover {
+  background-color: #676767;
+}
+
+.login-button {
+  width: 100%;
+
+  background-color: #f2ad57;
+  color: #333;
+
+  border: none;
+  border-radius: 999px;
+
+  padding: 18px;
+
+  font-size: 20px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+.login-button:hover {
+  background-color: #e69d3f;
+}
+
+.status-text {
+  color: #555;
+  font-size: 14px;
+}
+
+.toast {
+  position: fixed;
+
+  bottom: 30px;
+  right: 30px;
+
+  min-width: 260px;
+
+  padding: 14px 18px;
+
+  border-radius: 12px;
+
+  color: white;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+
+  z-index: 9999;
+
+  animation: toastIn 0.25s ease;
+}
+
+.toast-info {
+  background-color: #4b5563;
+}
+
+.toast-error {
+  background-color: #ef4444;
+}
+
+.toast-success {
+  background-color: #22c55e;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
