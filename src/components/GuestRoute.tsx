@@ -11,7 +11,6 @@ export default function GuestRoute({
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  // kalau sudah login redirect sesuai role
   if (token && role) {
 
     if (role === "ADMIN") {
@@ -19,7 +18,7 @@ export default function GuestRoute({
     }
 
     if (role === "GROWER") {
-      return <Navigate to="/grower/create" replace />;
+      return <Navigate to="/grower/trace-products" replace />;
     }
 
     if (role === "DISTRIBUTOR") {

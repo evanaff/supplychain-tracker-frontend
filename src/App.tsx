@@ -1,11 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-// import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 import ActorList from "./pages/admin/ActorList";
 import AddActor from "./pages/admin/AddActor";
-import CreateProduct from "./pages/grower/CreateProduct";
-import ShippingProduct from "./pages/grower/ShippingProduct";
+import CreateProduct from "./pages/admin/CreateProduct";
+import ProductList from "./pages/admin/ProductList";
+import ShipProductScan from "./pages/grower/ShipProductScan";
+import ShipProductTraceEvent from "./pages/grower/ShipProductTraceEvent";
 import DistributorDashboard from "./pages/distributor/DistributorDashboard";
 import RetailerDashboard from "./pages/retailer/RetailerDashboard";
 import ProductTracking from "./pages/product/ProductTracking";
@@ -13,6 +14,9 @@ import ProductHistory from "./pages/product/ProductHistory";
 import VerifyEvent from "./pages/VerifyEvent";
 import ProtectedRoute from "./components/ProtectedRoute";
 import GuestRoute from "./components/GuestRoute";
+import TraceProductList from "./pages/grower/TraceProductList";
+import TraceProductDetails from "./pages/grower/TraceProductDetails";
+import CreateTraceProduct from "./pages/grower/CreateTraceProduct";
 
 function App() {
   return (
@@ -52,21 +56,65 @@ function App() {
           }
         />
 
+        <Route
+          path="/admin/products"
+          element={
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <ProductList />
+          </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/create-product"
+          element={
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <CreateProduct />
+          </ProtectedRoute>
+          }
+        />
+
         {/* GROWER */}
         <Route
-          path="/grower/create"
+          path="/grower/trace-products"
           element={
-            <ProtectedRoute allowedRoles={["GROWER"]}>
-              <CreateProduct />
-            </ProtectedRoute>
+          <ProtectedRoute allowedRoles={["GROWER"]}>
+            <TraceProductList />
+          </ProtectedRoute>
           }
+        />
+        
+        <Route
+          path="/grower/trace-products/:traceProductId"
+          element={
+          <ProtectedRoute allowedRoles={["GROWER"]}>
+            <TraceProductDetails />
+          </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/grower/add-trace-product"
+          element={
+          <ProtectedRoute allowedRoles={["GROWER"]}>
+            <CreateTraceProduct />
+          </ProtectedRoute>}
         />
 
         <Route
           path="/grower/shipping"
           element={
             <ProtectedRoute allowedRoles={["GROWER"]}>
-              <ShippingProduct />
+              <ShipProductScan />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/grower/shipping/:traceProductId"
+          element={
+            <ProtectedRoute allowedRoles={["GROWER"]}>
+              <ShipProductTraceEvent />
             </ProtectedRoute>
           }
         />

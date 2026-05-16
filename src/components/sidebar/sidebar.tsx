@@ -2,11 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 
 import {
   Users,
-  PlusSquare,
-  PackagePlus,
-  Truck,
+  Package,
   LayoutDashboard,
-//   SearchCheck,
+  PackageSearch,
+  PlusSquare,
+  Truck,
 } from "lucide-react";
 
 import "./Sidebar.css";
@@ -26,17 +26,23 @@ export default function Sidebar() {
       },
 
       {
-        label: "Add Actor",
-        path: "/admin/add-actor",
-        icon: <PlusSquare size={24} />,
+        label: "Products",
+        path: "/admin/products",
+        icon: <Package size={24} />,
       },
     ],
 
     GROWER: [
       {
-        label: "Create Product",
-        path: "/grower/create",
-        icon: <PackagePlus size={24} />,
+        label: "Trace Product",
+        path: "/grower/trace-products",
+        icon: <PackageSearch size={24} />,
+      },
+
+      {
+        label: "Add Trace Product",
+        path: "/grower/add-trace-product",
+        icon: <PlusSquare size={24} />,
       },
 
       {
