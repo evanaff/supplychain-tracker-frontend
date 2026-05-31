@@ -1,5 +1,5 @@
 function DashboardPage() {
-  return <h1>Retailer Dashboard</h1>;
+    return <h1>Distributor Dashboard</h1>;
 }
 
 export default DashboardPage;

@@ -1,17 +1,17 @@
 import { Navigate, Outlet } from "react-router-dom";
 
 interface RoleRouteProps {
-  allowedRoles: string[];
+    allowedRoles: string[];
 }
 
 export default function RoleRoute({
-  allowedRoles,
+    allowedRoles,
 }: RoleRouteProps) {
-  const role = localStorage.getItem("role");
+    const role = localStorage.getItem("role");
 
-  if (!role || !allowedRoles.includes(role)) {
-    return <Navigate to="/login" replace />;
-  }
+    if (!role || !allowedRoles.includes(role)) {
+        return <Navigate to="/login" replace />;
+    }
 
-  return <Outlet />;
+    return <Outlet />;
 }

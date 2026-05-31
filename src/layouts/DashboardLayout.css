@@ -1,0 +1,19 @@
+.dashboard-layout {
+    min-height: 100vh;
+
+    background: #f5f7f9;
+}
+
+.dashboard-content {
+    margin-left: 260px;
+
+    padding-top: 92px;
+
+    min-height: 100vh;
+
+    padding-left: 32px;
+    padding-right: 32px;
+    padding-bottom: 32px;
+
+    box-sizing: border-box;
+}

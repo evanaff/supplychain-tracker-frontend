@@ -1,238 +1,232 @@
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 .login-page {
-  min-height: 100vh;
-  background: #f8fafc;
-  display: flex;
-  flex-direction: column;
+    min-height: 100vh;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
 }
 
 .login-container {
-  flex: 1;
-  display: flex;
+    flex: 1;
+    display: flex;
 }
 
-/* LEFT SIDE */
-
 .login-left {
-  width: 50%;
-  padding: 80px 100px;
-  background: #f7f8fa;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+    width: 50%;
+    padding: 80px 100px;
+    background: #f7f8fa;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .brand {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 120px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 120px;
 }
 
 .brand-logo {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #22c55e, #15803d);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #22c55e, #15803d);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .brand-logo span {
-  color: white;
-  font-size: 20px;
-  font-weight: 700;
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
 }
 
 .brand-text h2 {
-  margin: 0;
-  font-size: 38px;
-  font-weight: 700;
-  color: #0f172a;
+    margin: 0;
+    font-size: 38px;
+    font-weight: 700;
+    color: #0f172a;
 }
 
 .brand-text p {
-  margin: 4px 0 0;
-  color: #64748b;
-  font-size: 18px;
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 18px;
 }
 
 .welcome-section h1 {
-  font-size: 72px;
-  line-height: 1.1;
-  margin-bottom: 24px;
-  color: #0f172a;
+    font-size: 72px;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    color: #0f172a;
 }
 
 .welcome-section h1 span {
-  color: #16a34a;
+    color: #16a34a;
 }
 
 .welcome-section p {
-  max-width: 500px;
-  font-size: 22px;
-  color: #64748b;
-  line-height: 1.8;
+    max-width: 500px;
+    font-size: 22px;
+    color: #64748b;
+    line-height: 1.8;
 }
 
-/* RIGHT SIDE */
-
 .login-right {
-  width: 50%;
-  background: #ffffff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
+    width: 50%;
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
 }
 
 .login-card {
-  width: 100%;
-  max-width: 600px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 24px;
-  padding: 64px;
-  text-align: center;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    max-width: 600px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 24px;
+    padding: 64px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
 .metamask-icon-wrapper {
-  width: 120px;
-  height: 120px;
-  background: #f8fafc;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto 32px;
+    width: 120px;
+    height: 120px;
+    background: #f8fafc;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 32px;
 }
 
 .metamask-icon {
-  width: 72px;
-  height: 72px;
+    width: 72px;
+    height: 72px;
 }
 
 .login-card h2 {
-  margin: 0;
-  font-size: 42px;
-  color: #111827;
+    margin: 0;
+    font-size: 42px;
+    color: #111827;
 }
 
 .card-description {
-  color: #64748b;
-  font-size: 22px;
-  line-height: 1.7;
-  margin: 28px 0;
+    color: #64748b;
+    font-size: 22px;
+    line-height: 1.7;
+    margin: 28px 0;
 }
 
 .divider {
-  height: 1px;
-  background: #e5e7eb;
-  margin: 32px 0;
+    height: 1px;
+    background: #e5e7eb;
+    margin: 32px 0;
 }
 
 .metamask-button {
-  width: 100%;
-  border: none;
-  border-radius: 14px;
-  background: #16a34a;
-  color: white;
-  font-size: 26px;
-  font-weight: 600;
-  padding: 22px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 14px;
-  transition: 0.2s ease;
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    background: #16a34a;
+    color: white;
+    font-size: 26px;
+    font-weight: 600;
+    padding: 22px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    transition: 0.2s ease;
 }
 
 .metamask-button:hover {
-  background: #15803d;
+    background: #15803d;
 }
 
 .button-icon {
-  width: 34px;
-  height: 34px;
+    width: 34px;
+    height: 34px;
 }
 
 .security-note {
-  margin-top: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 12px;
-  color: #64748b;
-  font-size: 16px;
-  line-height: 1.7;
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 12px;
+    color: #64748b;
+    font-size: 16px;
+    line-height: 1.7;
 }
 
 .lock-icon {
-  font-size: 22px;
+    font-size: 22px;
 }
 
 .login-footer {
-  border-top: 1px solid #e5e7eb;
-  text-align: center;
-  padding: 24px;
-  color: #64748b;
-  background: #fff;
+    border-top: 1px solid #e5e7eb;
+    text-align: center;
+    padding: 24px;
+    color: #64748b;
+    background: #fff;
 }
 
-/* RESPONSIVE */
-
 @media (max-width: 1200px) {
-  .welcome-section h1 {
-    font-size: 52px;
-  }
+    .welcome-section h1 {
+        font-size: 52px;
+    }
 
-  .brand-text h2 {
-    font-size: 28px;
-  }
+    .brand-text h2 {
+        font-size: 28px;
+    }
 
-  .login-card {
-    padding: 48px;
-  }
+    .login-card {
+        padding: 48px;
+    }
 }
 
 @media (max-width: 900px) {
-  .login-container {
-    flex-direction: column;
-  }
+    .login-container {
+        flex-direction: column;
+    }
 
-  .login-left,
-  .login-right {
-    width: 100%;
-  }
+    .login-left,
+    .login-right {
+        width: 100%;
+    }
 
-  .login-left {
-    padding: 48px 32px;
-  }
+    .login-left {
+        padding: 48px 32px;
+    }
 
-  .brand {
-    margin-bottom: 64px;
-  }
+    .brand {
+        margin-bottom: 64px;
+    }
 
-  .welcome-section h1 {
-    font-size: 48px;
-  }
+    .welcome-section h1 {
+        font-size: 48px;
+    }
 
-  .login-card {
-    max-width: 100%;
-    padding: 40px 28px;
-  }
+    .login-card {
+        max-width: 100%;
+        padding: 40px 28px;
+    }
 
-  .login-card h2 {
-    font-size: 32px;
-  }
+    .login-card h2 {
+        font-size: 32px;
+    }
 
-  .card-description {
-    font-size: 18px;
-  }
+    .card-description {
+        font-size: 18px;
+    }
 }
