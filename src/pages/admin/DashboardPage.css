@@ -1,0 +1,46 @@
+.admin-stats-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 24px;
+
+    margin-bottom: 32px;
+}
+
+.quick-actions-card {
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 20px;
+
+    padding: 28px;
+
+    margin-bottom: 48px;
+}
+
+.quick-actions-card h2 {
+    margin-top: 0;
+    margin-bottom: 24px;
+
+    font-size: 24px;
+}
+
+.quick-actions-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 20px;
+}
+
+.dashboard-footer {
+    text-align: center;
+
+    color: #9ca3af;
+
+    font-size: 14px;
+}

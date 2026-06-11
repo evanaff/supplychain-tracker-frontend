@@ -1,0 +1,143 @@
+.scan-trace-product-page {
+    display: flex;
+    flex-direction: column;
+}
+
+.scan-trace-product-card {
+    width: 100%;
+    max-width: 900px;
+
+    margin: 0 auto;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+
+    padding: 40px;
+}
+.qr-scan-placeholder {
+    width: 700px;
+    height: 420px;
+
+    margin: 0 auto;
+
+    border: 1px dashed #d1d5db;
+    border-radius: 20px;
+
+    background: #ffffff;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 12px;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.qr-scan-placeholder:hover {
+    border-color: #16a34a;
+
+    background: #f9fafb;
+}
+
+.qr-scan-placeholder svg {
+    font-size: 42px;
+
+    color: #6b7280;
+}
+
+.qr-scan-placeholder h3 {
+    margin: 0;
+
+    color: #111827;
+
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.qr-scan-placeholder p {
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+.trace-product-search-section {
+    width: 100%;
+    max-width: 700px;
+
+    margin: 32px auto 0;
+}
+
+.trace-product-search-section label {
+    display: block;
+
+    margin-bottom: 12px;
+
+    color: #111827;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.trace-product-search-row {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+.trace-product-search-row input {
+    flex: 1;
+
+    height: 48px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+
+    padding: 0 16px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.trace-product-search-row input:focus {
+    border-color: #16a34a;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(22, 163, 74, 0.1);
+}
+
+#qr-reader {
+    max-width: 700px;
+    overflow: hidden;
+}
+
+#qr-reader video {
+    width: 100% !important;
+    height: auto !important;
+    border-radius: 20px;
+}
+
+#qr-reader__scan_region {
+    min-height: unset !important;
+}
+
+#qr-reader img {
+    display: none;
+}

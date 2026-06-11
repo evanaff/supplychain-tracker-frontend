@@ -1,0 +1,183 @@
+.verification-card {
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 20px;
+
+    padding: 24px;
+
+    height: fit-content;
+}
+
+.verification-card-title {
+    margin: 0 0 20px;
+
+    font-size: 1.25rem;
+    font-weight: 700;
+
+    color: #111827;
+}
+
+.verification-status-card {
+    background: #f0fdf4;
+
+    border-radius: 16px;
+
+    padding: 24px;
+
+    text-align: center;
+
+    margin-bottom: 24px;
+}
+
+.verification-status-card svg {
+    font-size: 36px;
+
+    color: #16a34a;
+
+    margin-bottom: 12px;
+}
+
+.verification-status-card span {
+    display: block;
+
+    color: #16a34a;
+
+    font-size: 1.5rem;
+    font-weight: 700;
+
+    margin-bottom: 12px;
+}
+
+.verification-status-card p {
+    margin: 0;
+
+    color: #4b5563;
+
+    font-size: 0.95rem;
+
+    line-height: 1.6;
+}
+
+.verification-details {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 18px;
+
+    margin-bottom: 24px;
+}
+
+.verification-detail-row {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 16px;
+}
+
+.verification-detail-row span {
+    color: #6b7280;
+
+    font-size: 0.95rem;
+}
+
+.verification-detail-row strong {
+    color: #111827;
+
+    text-align: right;
+
+    font-weight: 600;
+}
+
+.verification-explorer-button {
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 12px 16px;
+
+    border: 1px solid #16a34a;
+
+    border-radius: 12px;
+
+    color: #16a34a;
+
+    text-decoration: none;
+
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+}
+
+.verification-explorer-button:hover {
+    background: #f0fdf4;
+}
+
+.verification-action-button {
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 20px;
+
+    margin-bottom: 24px;
+
+    border: none;
+
+    border-radius: 16px;
+
+    background: #16a34a;
+
+    color: white;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.verification-action-button:hover {
+    background: #15803d;
+
+    transform: translateY(-1px);
+}
+
+.verification-action-button svg {
+    font-size: 32px;
+
+    flex-shrink: 0;
+}
+
+.verification-action-button div {
+    text-align: left;
+}
+
+.verification-action-button span {
+    display: block;
+
+    font-size: 1.1rem;
+    font-weight: 700;
+
+    margin-bottom: 4px;
+}
+
+.verification-action-button p {
+    margin: 0;
+
+    font-size: 0.9rem;
+
+    opacity: 0.9;
+
+    line-height: 1.5;
+}

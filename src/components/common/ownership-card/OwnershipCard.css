@@ -1,0 +1,70 @@
+.ownership-card {
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 20px;
+
+    padding: 24px;
+}
+
+.ownership-card-title {
+    margin: 0 0 24px;
+
+    font-size: 1.25rem;
+    font-weight: 700;
+
+    color: #111827;
+}
+
+.ownership-card-content {
+    display: flex;
+    align-items: center;
+
+    gap: 32px;
+}
+
+.ownership-section {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.ownership-label {
+    font-size: 0.875rem;
+
+    color: #6b7280;
+}
+
+.ownership-value {
+    font-size: 1.125rem;
+    font-weight: 600;
+
+    color: #111827;
+}
+
+.ownership-role {
+    width: fit-content;
+
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    background: #ecfdf5;
+
+    color: #15803d;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.ownership-divider {
+    width: 1px;
+
+    align-self: stretch;
+
+    background: #e5e7eb;
+}

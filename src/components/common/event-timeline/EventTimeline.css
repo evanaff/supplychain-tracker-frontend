@@ -1,0 +1,134 @@
+.timeline-list { 
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+} 
+
+.timeline-current-actor {
+    color: #16a34a;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.timeline-pending-text {
+    margin-top: 14px;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+.timeline-row {
+    padding: 0;
+}
+
+.timeline-left { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    padding-top: 8px;
+} 
+
+.timeline-icon { 
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid;
+    background: #ffffff;
+    font-size: 20px;
+    flex-shrink: 0;
+} 
+
+.timeline-line { 
+    width: 3px;
+    flex: 1;
+    min-height: 72px;
+    margin-top: 8px;
+    border-radius: 999px;
+} 
+/* HARVESTING */ 
+.timeline-harvesting { 
+    color: #16a34a;
+    border-color: #16a34a;
+} 
+
+.timeline-line-harvesting { 
+    background: #16a34a;
+} 
+/* SHIPPING */ 
+.timeline-shipping { 
+    color: #2563eb;
+    border-color: #2563eb;
+} 
+
+.timeline-line-shipping { 
+    background: #2563eb;
+} 
+/* RECEIVING */ 
+.timeline-receiving { 
+    color: #f59e0b;
+    border-color: #f59e0b;
+} 
+
+.timeline-line-receiving { 
+    background: #f59e0b;
+} 
+/* SELLING */ 
+.timeline-selling { 
+    color: #7c3aed;
+    border-color: #7c3aed;
+} 
+
+.timeline-line-selling { 
+    background: #7c3aed;
+} 
+
+.timeline-content { 
+    flex: 1;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 18px 22px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+} 
+
+.timeline-row:hover 
+.timeline-content { 
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+} 
+
+.timeline-header { 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+} 
+
+.timeline-header { 
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px; margin-bottom: 18px; 
+} 
+
+.timeline-title-group { 
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; 
+} 
+
+.timeline-meta { 
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: #374151; font-size: 14px; line-height: 1.5; 
+} 
+
+.timeline-meta:last-child { 
+    margin-bottom: 0; 
+} 
+
+.timeline-meta svg { 
+    flex-shrink: 0; color: #6b7280; font-size: 16px; 
+}

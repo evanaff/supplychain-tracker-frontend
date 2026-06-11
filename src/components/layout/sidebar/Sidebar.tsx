@@ -10,13 +10,10 @@ import {
     FiSearch,
     FiLogOut,
 } from "react-icons/fi";
+import type { Role } from "../../../types/types";
 
 interface SidebarProps {
-    role:
-        | "ADMIN"
-        | "GROWER"
-        | "DISTRIBUTOR"
-        | "RETAILER";
+    role: Role
 }
 
 interface MenuItem {
@@ -52,11 +49,11 @@ function Sidebar({ role }: SidebarProps) {
         ],
 
         GROWER: [
-            {
-                label: "Dashboard",
-                path: "/grower/dashboard",
-                icon: <FiGrid />,
-            },
+            // {
+            //     label: "Dashboard",
+            //     path: "/grower/dashboard",
+            //     icon: <FiGrid />,
+            // },
             {
                 label: "Trace Products",
                 path: "/grower/trace-products",
@@ -64,17 +61,17 @@ function Sidebar({ role }: SidebarProps) {
             },
             {
                 label: "Scan Product",
-                path: "/grower/scan-product",
+                path: "/grower/scan",
                 icon: <FiSearch />,
             },
         ],
 
         DISTRIBUTOR: [
-            {
-                label: "Dashboard",
-                path: "/distributor/dashboard",
-                icon: <FiGrid />,
-            },
+            // {
+            //     label: "Dashboard",
+            //     path: "/distributor/dashboard",
+            //     icon: <FiGrid />,
+            // },
             {
                 label: "Trace Products",
                 path: "/distributor/trace-products",
@@ -82,17 +79,17 @@ function Sidebar({ role }: SidebarProps) {
             },
             {
                 label: "Scan Product",
-                path: "/distributor/scan-product",
+                path: "/distributor/scan",
                 icon: <FiSearch />,
             },
         ],
 
         RETAILER: [
-            {
-                label: "Dashboard",
-                path: "/retailer/dashboard",
-                icon: <FiGrid />,
-            },
+            // {
+            //     label: "Dashboard",
+            //     path: "/retailer/dashboard",
+            //     icon: <FiGrid />,
+            // },
             {
                 label: "Trace Products",
                 path: "/retailer/trace-products",
@@ -100,7 +97,7 @@ function Sidebar({ role }: SidebarProps) {
             },
             {
                 label: "Scan Product",
-                path: "/retailer/scan-product",
+                path: "/retailer/scan",
                 icon: <FiSearch />,
             },
         ],

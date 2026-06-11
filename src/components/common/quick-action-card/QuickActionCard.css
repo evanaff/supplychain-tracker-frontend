@@ -1,0 +1,85 @@
+.quick-action-card {
+    width: 100%;
+
+    border: 3px solid #7fd6b4;
+
+    background: #ffffff;
+
+    border-radius: 16px;
+
+    padding: 22px 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
+    text-align: left;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-2px);
+
+    border-color: #09a86b;
+
+    box-shadow:
+        0 6px 20px
+        rgba(9, 168, 107, 0.08);
+}
+
+.quick-action-left {
+    display: flex;
+    align-items: center;
+
+    gap: 18px;
+}
+
+.quick-action-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #09a86b;
+}
+
+.quick-action-icon svg {
+    font-size: 26px;
+
+    flex-shrink: 0;
+}
+
+.quick-action-content h3 {
+    margin: 0 0 4px;
+
+    color: #09a86b;
+
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.quick-action-content p {
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+.quick-action-arrow {
+    display: flex;
+    align-items: center;
+
+    color: #09a86b;
+}
+
+.quick-action-arrow svg {
+    font-size: 22px;
+}

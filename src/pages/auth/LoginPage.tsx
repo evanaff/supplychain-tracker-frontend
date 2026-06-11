@@ -74,23 +74,7 @@ function LoginPage() {
             localStorage.setItem("role", actor.role);
             localStorage.setItem("walletAddress", actor.address);
 
-            switch (actor.role) {
-                case "ADMIN":
-                    navigate("/admin/dashboard");
-                    break;
-
-                case "GROWER":
-                    navigate("/grower/dashboard");
-                    break;
-
-                case "DISTRIBUTOR":
-                    navigate("/distributor/dashboard");
-                    break;
-
-                case "RETAILER":
-                    navigate("/retailer/dashboard");
-                    break;
-            }
+            navigate(`/${actor.role.toLowerCase()}/trace-products`);
         } catch (err) {
             console.error(err);
             alert("Login failed. Please try again.");
