@@ -132,3 +132,30 @@
 .timeline-meta svg { 
     flex-shrink: 0; color: #6b7280; font-size: 16px; 
 }
+
+.timeline-invalid {
+    border-color: #dc2626;
+    background: #fef2f2;
+}
+
+.timeline-missing {
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.timeline-verification-message {
+    margin-top: 12px;
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.timeline-verification-message.error {
+    padding-top: 10px;
+    color: #dc2626;
+}
+
+.timeline-verification-message.warning {
+    padding-top: 10px;
+    color: #d97706;
+}

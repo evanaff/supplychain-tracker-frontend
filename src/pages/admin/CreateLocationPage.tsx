@@ -12,6 +12,7 @@ import { createLocation } from "../../api/locationApi";
 import type { CreateLocationDTO } from "../../types/dataTransferObjects";
 import toast from "react-hot-toast";
 import type { AxiosError } from "axios";
+import type { Role } from "../../types/types";
 
 function CreateLocationPage() {
     const navigate =
@@ -31,6 +32,8 @@ function CreateLocationPage() {
 
     const [address, setAddress] =
         useState("");
+
+    const [allowedRole, setAllowedRole] =useState<Role>("GROWER");
 
     const [isLoading, setIsLoading] =
         useState(false);
@@ -60,6 +63,7 @@ function CreateLocationPage() {
                 province,
                 city,
                 address,
+                allowedRole
             };
 
             const res = await createLocation(payload);
@@ -142,6 +146,77 @@ function CreateLocationPage() {
                                 )
                             }
                         />
+                    </div>
+
+                    <div className="form-group">
+                        <label>
+                            Allowed Role
+                        </label>
+
+                        <div className="role-options">
+                            <label className="role-option role-grower">
+                                <input
+                                    type="radio"
+                                    name="role"
+                                    value="GROWER"
+                                    checked={
+                                        allowedRole ===
+                                        "GROWER"
+                                    }
+                                    onChange={() =>
+                                        setAllowedRole(
+                                            "GROWER"
+                                        )
+                                    }
+                                />
+
+                                <span>
+                                    GROWER
+                                </span>
+                            </label>
+
+                            <label className="role-option role-distributor">
+                                <input
+                                    type="radio"
+                                    name="role"
+                                    value="DISTRIBUTOR"
+                                    checked={
+                                        allowedRole ===
+                                        "DISTRIBUTOR"
+                                    }
+                                    onChange={() =>
+                                        setAllowedRole(
+                                            "DISTRIBUTOR"
+                                        )
+                                    }
+                                />
+
+                                <span>
+                                    DISTRIBUTOR
+                                </span>
+                            </label>
+
+                            <label className="role-option role-retailer">
+                                <input
+                                    type="radio"
+                                    name="role"
+                                    value="RETAILER"
+                                    checked={
+                                        allowedRole ===
+                                        "RETAILER"
+                                    }
+                                    onChange={() =>
+                                        setAllowedRole(
+                                            "RETAILER"
+                                        )
+                                    }
+                                />
+
+                                <span>
+                                    RETAILER
+                                </span>
+                            </label>
+                        </div>
                     </div>
 
                     <div className="location-grid">

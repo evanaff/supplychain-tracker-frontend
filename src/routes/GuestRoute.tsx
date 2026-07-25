@@ -16,16 +16,13 @@ export default function GuestRoute({
                 return <Navigate to="/admin/dashboard" replace />;
 
             case "GROWER":
-                return <Navigate to="/grower/dashboard" replace />;
+                return <Navigate to="/grower/trace-products" replace />;
 
             case "DISTRIBUTOR":
-                return <Navigate to="/distributor/dashboard" replace />;
+                return <Navigate to="/distributor/trace-products" replace />;
 
             case "RETAILER":
-                return <Navigate to="/retailer/dashboard" replace />;
-
-            case "CONSUMER":
-                return <Navigate to="/consumer/dashboard" replace />;
+                return <Navigate to="/retailer/trace-products" replace />;
 
             default:
                 break;

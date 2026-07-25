@@ -11,14 +11,13 @@ import RoleRoute from "./RolesRoute";
 import CreateActorPage from "../pages/admin/CreateActorPage";
 import LocationListPage from "../pages/admin/LocationListPage";
 import CreateLocationPage from "../pages/admin/CreateLocationPage";
-import DashboardPage from "../pages/executor/dashboard/DashboardPage";
-import TraceProductListPage from "../pages/executor/trace-product/TraceProductListPage";
-import CreateTraceProductPage from "../pages/executor/trace-product/CreateTraceProductPage";
-import TraceProductDetailPage from "../pages/executor/trace-product/TraceProductDetailPage";
-import TraceEventDetailPage from "../pages/executor/trace-event/TraceEventDetailPage";
-import CreateTraceEventPage from "../pages/executor/trace-event/CreateTraceEventPage";
-import ReviewTraceEventPage from "../pages/executor/trace-event/ReviewTraceEventPage";
-import ScanTraceProductPage from "../pages/executor/scan/ScanTraceProductPage";
+import TraceProductListPage from "../pages/shared/trace-product/TraceProductListPage";
+import CreateTraceProductPage from "../pages/shared/trace-product/CreateTraceProductPage";
+import TraceProductDetailPage from "../pages/shared/trace-product/TraceProductDetailPage";
+import TraceEventDetailPage from "../pages/shared/trace-event/TraceEventDetailPage";
+import CreateTraceEventPage from "../pages/shared/trace-event/CreateTraceEventPage";
+import ReviewTraceEventPage from "../pages/shared/trace-event/ReviewTraceEventPage";
+import ScanTraceProductPage from "../pages/shared/scan/ScanTraceProductPage";
 import TraceProductHistoryPage from "../pages/consumer/TraceProductHistoryPage";
 
 export default function AppRoutes() {
@@ -90,16 +89,32 @@ export default function AppRoutes() {
                         element={<CreateLocationPage />}
                     />
                 </Route>
-
-                {/* GROWER */}
                 <Route
-                    element={<RoleRoute allowedRoles={["GROWER"]} />}
+                    element={<RoleRoute allowedRoles={["ADMIN"]} />}
                 >
                     <Route
-                        path="/grower/dashboard"
-                        element={<DashboardPage role="GROWER" />}
+                        path="/admin/trace-products"
+                        element={<TraceProductListPage role="ADMIN" />}
                     />
                 </Route>
+                <Route
+                    element={<RoleRoute allowedRoles={["ADMIN"]} />}
+                >
+                    <Route
+                        path="/admin/trace-products/:id"
+                        element={<TraceProductDetailPage role="ADMIN" />}
+                    />
+                </Route>
+                <Route
+                    element={<RoleRoute allowedRoles={["ADMIN"]} />}
+                >
+                    <Route
+                        path="/admin/trace-events/:id"
+                        element={<TraceEventDetailPage role="ADMIN"/>}
+                    />
+                </Route>
+
+                {/* GROWER */}
                 <Route
                     element={<RoleRoute allowedRoles={["GROWER"]} />}
                 >
@@ -170,14 +185,6 @@ export default function AppRoutes() {
                     element={<RoleRoute allowedRoles={["DISTRIBUTOR"]} />}
                 >
                     <Route
-                        path="/distributor/dashboard"
-                        element={<DashboardPage role="DISTRIBUTOR" />}
-                    />
-                </Route>
-                <Route
-                    element={<RoleRoute allowedRoles={["DISTRIBUTOR"]} />}
-                >
-                    <Route
                         path="/distributor/trace-products"
                         element={<TraceProductListPage role="DISTRIBUTOR" />}
                     />
@@ -232,14 +239,6 @@ export default function AppRoutes() {
                 </Route>
 
                 {/* RETAILER */}
-                <Route
-                    element={<RoleRoute allowedRoles={["RETAILER"]} />}
-                >
-                    <Route
-                        path="/retailer/dashboard"
-                        element={<DashboardPage role="RETAILER" />}
-                    />
-                </Route>
                 <Route
                     element={<RoleRoute allowedRoles={["RETAILER"]} />}
                 >

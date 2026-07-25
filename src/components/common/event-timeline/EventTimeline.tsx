@@ -1,15 +1,22 @@
 import "./EventTimeline.css";
 
 import Badge from "../badge/Badge";
-import { FiCheck, FiTruck, FiMapPin, FiClock } from "react-icons/fi";
+import { FiUser, FiTruck, FiMapPin, FiClock, FiShoppingCart } from "react-icons/fi";
 import { PiPlant } from "react-icons/pi";
-import { LuPackageCheck } from "react-icons/lu";
+import { LuPackage } from "react-icons/lu";
 
 import type { SupplyChainActivity, TraceEvent } from "../../../types/types";
 import { timestampToDate } from "../../../utils";
 
 interface EventTimelineProps {
     events: TraceEvent[];
+    showActor: boolean;
+    showRecordStatus: boolean;
+    showCurrentActor: boolean;
+
+    validEventIds?: string[];
+    invalidEventIds?: string[];
+    missingEventIds?: string[];
 
     onClickEvent?: (
         eventId: string
@@ -18,6 +25,14 @@ interface EventTimelineProps {
 
 function EventTimeline({
     events,
+    showActor,
+    showRecordStatus,
+    showCurrentActor,
+
+    validEventIds,
+    invalidEventIds,
+    missingEventIds,
+
     onClickEvent,
 }: EventTimelineProps) {
     const walletAddress = localStorage.getItem("walletAddress");
@@ -36,12 +51,12 @@ function EventTimeline({
 
             case "RECEIVING":
                 return (
-                    <LuPackageCheck />
+                    <LuPackage />
                 );
 
             case "SELLING":
                 return (
-                    <FiCheck />
+                    <FiShoppingCart />
                 );
 
             default:
@@ -102,6 +117,39 @@ function EventTimeline({
         }
     }
 
+    function getVerificationStatus(
+        eventId: string
+    ) {
+        if (invalidEventIds?.includes(eventId)) {
+            return "INVALID";
+        }
+
+        if (missingEventIds?.includes(eventId)) {
+            return "MISSING";
+        }
+
+        if (validEventIds?.includes(eventId)) {
+            return "VALID";
+        }
+
+        return null;
+    }
+
+    function getVerificationClass(
+        status: string | null
+    ) {
+        switch (status) {
+            case "INVALID":
+                return "timeline-invalid";
+
+            case "MISSING":
+                return "timeline-missing";
+
+            default:
+                return "";
+        }
+    }
+
     return (
         <div className="timeline-list">
             {events.map(
@@ -111,6 +159,7 @@ function EventTimeline({
                 ) => {
                     const variant = getTimelineClass(event.supplyChainActivity);
                     const isLast =index === events.length - 1;
+                    const verificationStatus = getVerificationStatus(event.id);
 
                     return (
                         <button
@@ -135,7 +184,12 @@ function EventTimeline({
                                 )}
                             </div>
 
-                            <div className="timeline-content">
+                            <div
+                                className={`
+                                    timeline-content
+                                    ${getVerificationClass(verificationStatus)}
+                                `}
+                            >
                                 <div className="timeline-header">
                                     <div className="timeline-title-group">
                                         <Badge
@@ -144,25 +198,62 @@ function EventTimeline({
                                             {event.supplyChainActivity}
                                         </Badge>
 
+                                        {showCurrentActor && event.actor.blockchainAddress === walletAddress && (
+                                            <span className="timeline-current-actor">
+                                                Current Actor
+                                            </span>
+                                        )}
+
+                                    </div>
+                                    {verificationStatus && (
                                         <Badge
                                             variant={
-                                                event.validationStatus ===
-                                                "VALID"
+                                                verificationStatus === "VALID"
+                                                    ? "success"
+                                                    : verificationStatus === "INVALID"
+                                                    ? "danger"
+                                                    : "warning"
+                                            }
+                                        >
+                                            {verificationStatus}
+                                        </Badge>
+                                    )}
+                                    
+                                    {showRecordStatus && (
+                                        <Badge
+                                            variant={
+                                                event.isRecorded
                                                     ? "success"
                                                     : "warning"
                                             }
                                         >
-                                            {event.validationStatus}
+                                            {event.isRecorded
+                                                    ? "RECORDED"
+                                                    : "NOT RECORDED"
+                                            }
                                         </Badge>
-                                    </div>
-
-                                    {event.actor.blockchainAddress === walletAddress && (
-                                        <span className="timeline-current-actor">
-                                            Current
-                                            Actor
-                                        </span>
                                     )}
                                 </div>
+
+                                {event.actor && showActor && (
+                                    <div className="timeline-meta">
+                                        <FiUser />
+
+                                        <span>
+                                            {event.actor.name}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {event.actor.location && (
+                                    <div className="timeline-meta">
+                                        <FiMapPin />
+
+                                        <span>
+                                            {`${event.actor.location.name}, ${event.actor.location.city}, ${event.actor.location.province}`}
+                                        </span>
+                                    </div>
+                                )}
 
                                 {event.timestamp && (
                                     <div className="timeline-meta">
@@ -174,23 +265,25 @@ function EventTimeline({
                                     </div>
                                 )}
 
-                                {event.actor.location && (
-                                    <div className="timeline-meta">
-                                        <FiMapPin />
+                                <div className="timeline-meta">
+                                    <span>
+                                        Tx Hash: {
+                                            event.txHash
+                                            ? `${event.txHash.slice(0, 5)}...${event.txHash.slice(-5)}`
+                                            : "-"
+                                        }
+                                    </span>
+                                </div>
 
-                                        <span>
-                                            {event.actor.location.name}
-                                        </span>
+                                {verificationStatus === "INVALID" && (
+                                    <div className="timeline-verification-message error">
+                                        Event data does not match blockchain record.
                                     </div>
                                 )}
 
-                                {event.actor && (
-                                    <div className="timeline-meta">
-                                        <FiCheck />
-
-                                        <span>
-                                            {event.actor.name}
-                                        </span>
+                                {verificationStatus === "MISSING" && (
+                                    <div className="timeline-verification-message warning">
+                                        Blockchain record not found.
                                     </div>
                                 )}
                             </div>

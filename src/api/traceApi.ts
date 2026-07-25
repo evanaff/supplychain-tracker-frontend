@@ -41,6 +41,12 @@ export async function getTraceProductHistory(id: string) {
     return res.data;
 }
 
+export async function postVerifyTraceProduct(id:string) {
+    const res = await api.post(`/traces/trace-products/${id}/verify`);
+
+    return res.data;
+}
+
 // =====================
 // Trace Events
 // =====================

@@ -59,7 +59,7 @@ function ScanTraceProductPage({
                 traceProductId.trim();
 
             navigate(
-                `/grower/trace-products/${targetId}`
+                `/${role.toLowerCase()}/trace-products/${targetId}`
             );
         };
 
@@ -83,8 +83,7 @@ function ScanTraceProductPage({
 
                     <div className="trace-product-search-section">
                         <label>
-                            Or enter Trace
-                            Product ID
+                            Or enter Trace Product ID
                         </label>
 
                         <div className="trace-product-search-row">

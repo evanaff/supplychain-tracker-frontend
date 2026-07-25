@@ -2,8 +2,10 @@ import { useState } from "react";
 import { ethers, getAddress } from "ethers";
 import { useNavigate } from "react-router-dom";
 
-import { getNonce, generateMessage, verifySignature } from "../../api/authApi";
+import { verifySignature, generateMessage } from "../../api/authApi";
 import "./LoginPage.css";
+import toast from "react-hot-toast";
+import type { AxiosError } from "axios";
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -12,26 +14,23 @@ function LoginPage() {
     const [loading, setLoading] = useState(false);
 
     async function connectWallet() {
-        try {
-            if (!window.ethereum) {
-                alert("MetaMask is not installed");
-                return;
-            }
+        const provider =
+            new ethers.BrowserProvider(
+                window.ethereum
+            );
 
-            const provider = new ethers.BrowserProvider(window.ethereum);
-            const accounts = await provider.send("eth_requestAccounts", []);
-            setAddress(accounts[0]);
-        } catch (err) {
-            console.error(err);
-        }
+        const accounts =
+            await provider.send(
+                "eth_requestAccounts",
+                []
+            );
+
+        setAddress(accounts[0]);
     }
 
     async function handleLogin() {
         try {
             setLoading(true);
-
-            const nonceRes = await getNonce(address);
-            const nonce = nonceRes.nonce;
 
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
@@ -42,17 +41,15 @@ function LoginPage() {
             const version = "1";
             const chainId = Number(network.chainId);
 
-            const messageRes =await generateMessage(
+            const res = await generateMessage(
                 domain,
                 checksumAddress,
                 uri,
                 version,
                 chainId,
-                nonce
             );
 
-            const message =
-                messageRes.message;
+            const message = res.message;
 
             const signature =
                 await signer.signMessage(message);
@@ -74,10 +71,16 @@ function LoginPage() {
             localStorage.setItem("role", actor.role);
             localStorage.setItem("walletAddress", actor.address);
 
-            navigate(`/${actor.role.toLowerCase()}/trace-products`);
-        } catch (err) {
-            console.error(err);
-            alert("Login failed. Please try again.");
+            if (actor.role === "ADMIN") {
+                navigate(`/${actor.role.toLowerCase()}/dashboard`);
+            } else {
+                navigate(`/${actor.role.toLowerCase()}/trace-products`);
+            }
+        } catch (error) {
+            const axiosError = error as AxiosError<{
+                message: string
+            }>;
+            toast.error(axiosError.response?.data.message ?? "Login failed. Please try again.")
         } finally {
             setLoading(false);
         }
@@ -89,13 +92,8 @@ function LoginPage() {
                 {/* LEFT SECTION */}
                 <div className="login-left">
                     <div className="brand">
-                        <div className="brand-logo">
-                            <span>SC</span>
-                        </div>
-
                         <div className="brand-text">
                             <h2>Supply Chain Tracker</h2>
-                            <p>Blockchain-Powered Traceability</p>
                         </div>
                     </div>
 
@@ -107,8 +105,7 @@ function LoginPage() {
                         </h1>
 
                         <p>
-                            Connect your MetaMask wallet to access the Supply Chain
-                            Tracker dashboard.
+                            Connect your MetaMask wallet
                         </p>
                     </div>
                 </div>
@@ -127,60 +124,52 @@ function LoginPage() {
                         <h2>Connect with MetaMask</h2>
 
                         <p className="card-description">
-                            Use your MetaMask wallet to securely sign in and access your
-                            account.
+                            Use your MetaMask wallet to securely sign in and access your account.
                         </p>
 
                         <div className="divider" />
 
+                        <div className="wallet-section">
+                            {address && (
+                                <div className="wallet-info">
+                                    <label>Connected Wallet</label>
+
+                                    <div className="wallet-address">
+                                        {address}
+                                    </div>
+
+                                    <button
+                                        className="change-wallet-button"
+                                        onClick={connectWallet}
+                                        type="button"
+                                    >
+                                        Change Wallet
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
                         {!address ? (
                             <button
                                 className="metamask-button"
-                                onClick={
-                                    connectWallet
-                                }
+                                onClick={connectWallet}
                             >
-                                <img
-                                    src="/MetaMask-icon-fox.svg"
-                                    alt="MetaMask"
-                                    className="button-icon"
-                                />
-
                                 Connect MetaMask
                             </button>
                         ) : (
-                            <>
-                                <p>
-                                    Connected:
-                                    <br />
-                                    {address.slice(
-                                        0,
-                                        8
-                                    )}
-                                    ...
-                                    {address.slice(-6)}
-                                </p>
-
-                                <button
-                                    className="metamask-button"
-                                    onClick={
-                                        handleLogin
-                                    }
-                                    disabled={loading}
-                                >
-                                    {loading
-                                        ? "Signing..."
-                                        : "Verify Signature"}
-                                </button>
-                            </>
+                            <button
+                                className="metamask-button"
+                                onClick={handleLogin}
+                                disabled={loading}
+                            >
+                                {loading
+                                    ? "Signing..."
+                                    : "Verify Signature"}
+                            </button>
                         )}
                     </div>
                 </div>
             </div>
-
-            <footer className="login-footer">
-                © 2026 Supply Chain Tracker. All rights reserved.
-            </footer>
         </div>
     );
 }

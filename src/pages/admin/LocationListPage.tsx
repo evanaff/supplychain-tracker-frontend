@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import RoleLayout from "../../layouts/RoleLayout";
-
 import PageHeader from "../../components/layout/page-header/PageHeader";
 import Button from "../../components/common/button/Button";
 import Pagination from "../../components/common/pagination/Pagination";
@@ -14,8 +13,9 @@ import {
     FiSearch,
 } from "react-icons/fi";
 
-import { type Location } from "../../types/types";
+import { type Location, type Role } from "../../types/types";
 import { listLocations } from "../../api/locationApi";
+import Badge from "../../components/common/badge/Badge";
 
 function LocationListPage() {
     const navigate =
@@ -49,6 +49,24 @@ function LocationListPage() {
         };
         fetchLocations();
     }, [page, search]);
+
+    function getBadgeVariant(
+        role: Role
+    ) {
+        switch (role) {
+            case "GROWER":
+                return "success";
+
+            case "DISTRIBUTOR":
+                return "info";
+
+            case "RETAILER":
+                return "purple";
+
+            default:
+                return "gray";
+        }
+    }
 
     return (
         <RoleLayout role="ADMIN">
@@ -107,8 +125,11 @@ function LocationListPage() {
                                 </th>
 
                                 <th>
-                                    Location
-                                    Name
+                                    Location Name
+                                </th>
+
+                                <th>
+                                    Allowed Role
                                 </th>
 
                                 <th>
@@ -145,6 +166,14 @@ function LocationListPage() {
                                             {
                                                 location.name
                                             }
+                                        </td>
+
+                                        <td>
+                                            <Badge
+                                                variant={getBadgeVariant(location.allowedRole)}
+                                            >
+                                                {location.allowedRole}
+                                            </Badge>
                                         </td>
 
                                         <td>

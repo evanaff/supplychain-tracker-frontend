@@ -46,14 +46,14 @@ function Sidebar({ role }: SidebarProps) {
                 path: "/admin/locations",
                 icon: <FiMapPin />,
             },
+            {
+                label: "Trace Products",
+                path: "/admin/trace-products",
+                icon: <FiPackage />,
+            },
         ],
 
         GROWER: [
-            // {
-            //     label: "Dashboard",
-            //     path: "/grower/dashboard",
-            //     icon: <FiGrid />,
-            // },
             {
                 label: "Trace Products",
                 path: "/grower/trace-products",
@@ -67,11 +67,6 @@ function Sidebar({ role }: SidebarProps) {
         ],
 
         DISTRIBUTOR: [
-            // {
-            //     label: "Dashboard",
-            //     path: "/distributor/dashboard",
-            //     icon: <FiGrid />,
-            // },
             {
                 label: "Trace Products",
                 path: "/distributor/trace-products",
@@ -85,11 +80,6 @@ function Sidebar({ role }: SidebarProps) {
         ],
 
         RETAILER: [
-            // {
-            //     label: "Dashboard",
-            //     path: "/retailer/dashboard",
-            //     icon: <FiGrid />,
-            // },
             {
                 label: "Trace Products",
                 path: "/retailer/trace-products",

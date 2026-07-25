@@ -22,6 +22,8 @@ interface Props {
 function TraceProductDetailPage({
     role,
 }: Props) {
+    const walletAddress = localStorage.getItem("walletAddress");
+    
     const navigate = useNavigate();
     
     const { id } = useParams();
@@ -31,6 +33,8 @@ function TraceProductDetailPage({
     const [traceProduct, setTraceProduct] = useState<TraceProduct>();
 
     const [traceEvents, setTraceEvents] = useState<TraceEvent[]>([]);
+
+    const [lastEvent, setLastEvent] = useState<TraceEvent>();
 
     const qrRef = useRef<HTMLDivElement>(null);
 
@@ -43,6 +47,7 @@ function TraceProductDetailPage({
 
                 setTraceProduct(res.data.traceProduct);
                 setTraceEvents(res.data.traceEvents);
+                setLastEvent(traceEvents[traceEvents.length-1]);
             } catch (error) {
                 console.error(error);
             } finally {
@@ -50,30 +55,34 @@ function TraceProductDetailPage({
             }
         }
         fetchTraceProductHistory();
-    }, [id]);
+    }, [id, traceEvents]);
 
     function renderActionButtons() {
         if (!traceProduct) return
-        
+
         if (role === "GROWER") {
-            return (
-                <Button
-                    onClick={() => 
-                        traceEvents.length > 0
-                            ? navigate(`/${role.toLowerCase()}/trace-products/${traceProduct.id}/shipping`)
-                            : navigate(`/${role.toLowerCase()}/trace-products/${traceProduct.id}/harvesting`)
-                    }
-                >
-                    {traceEvents.length > 0
-                        ? "Create Shipping Event"
-                        : "Create Harvesting Event"}
-                </Button>
-            );
+            if (!lastEvent) {
+                return (
+                    <Button
+                        onClick={() => navigate(`/${role.toLowerCase()}/trace-products/${traceProduct.id}/harvesting`)}
+                    >
+                        Create Harvesting Event
+                    </Button>
+                );
+            } else if (lastEvent.supplyChainActivity === "HARVESTING") {
+                return (
+                    <Button
+                        onClick={() => navigate(`/${role.toLowerCase()}/trace-products/${traceProduct.id}/shipping`)}
+                    >
+                        Create Shipping Event
+                    </Button>
+                );
+            }
         }
 
-        if (role ==="DISTRIBUTOR") {
-            return (
-                <>
+        if (role === "DISTRIBUTOR") {
+            if (lastEvent?.supplyChainActivity === "SHIPPING" && lastEvent.actor.blockchainAddress !== walletAddress) {
+                return (
                     <Button 
                         onClick={() => {
                             navigate(`/${role.toLowerCase()}/trace-products/${traceProduct.id}/receiving`)
@@ -81,7 +90,9 @@ function TraceProductDetailPage({
                     >
                         Create Receiving Event
                     </Button>
-
+                )
+            } else if (lastEvent?.supplyChainActivity === "RECEIVING" && lastEvent.actor.blockchainAddress === walletAddress) {
+                return (
                     <Button
                         onClick={() => {
                             navigate(`/${role.toLowerCase()}/trace-products/${traceProduct.id}/shipping`)
@@ -89,32 +100,37 @@ function TraceProductDetailPage({
                     >
                         Create Shipping Event
                     </Button>
-                </>
-            );
+                )
+            }
         }
 
-        return (
-            <>
-                <Button 
-                    onClick={() => {
-                        navigate(`/${role.toLowerCase()}/trace-products/${traceProduct.id}/receiving`)
-                    }}
-                >
-                    Create Receiving Event
-                </Button>
+        if (role === "RETAILER") {
+            if (lastEvent?.supplyChainActivity === "SHIPPING" && lastEvent.actor.blockchainAddress !== walletAddress) {
+                return (
+                    <Button 
+                        onClick={() => {
+                            navigate(`/${role.toLowerCase()}/trace-products/${traceProduct.id}/receiving`)
+                        }}
+                    >
+                        Create Receiving Event
+                    </Button>
+                )
+            } else if (lastEvent?.supplyChainActivity === "RECEIVING" && lastEvent.actor.blockchainAddress === walletAddress) {
+                return (
+                    <Button
+                        onClick={() => {
+                            navigate(`/${role.toLowerCase()}/trace-products/${traceProduct.id}/selling`)
+                        }}
+                    >
+                        Create Selling Event
+                    </Button>
+                )
+            }
+        }
 
-                <Button 
-                    onClick={() => {
-                        navigate(`/${role.toLowerCase()}/trace-products/${traceProduct.id}/selling`)
-                    }}
-                >
-                    Create Selling Event
-                </Button>
-            </>
-        );
     }
 
-    function handlerDownloadQR () {
+    function handleDownloadQR () {
         if (!traceProduct) return;
 
         const svg = qrRef.current?.querySelector("svg");
@@ -137,7 +153,7 @@ function TraceProductDetailPage({
             const pngFile = canvas.toDataURL("image/png");
 
             const downloadLink = document.createElement("a");
-            downloadLink.download = `trace-product=${traceProduct.id}.png`;
+            downloadLink.download = `${traceProduct.id}.png`;
             downloadLink.href = pngFile;
             
             downloadLink.click();
@@ -196,7 +212,7 @@ function TraceProductDetailPage({
                             iconLeft={
                                 <FiDownload />
                             }
-                            onClick={handlerDownloadQR}
+                            onClick={handleDownloadQR}
                         >
                             Download QR
                         </Button>
@@ -285,6 +301,9 @@ function TraceProductDetailPage({
                     {traceEvents.length > 0 ? (
                         <EventTimeline
                             events={traceEvents}
+                            showActor={true}
+                            showRecordStatus={true}
+                            showCurrentActor={true}
                             onClickEvent={handleClickEvent}
                         />
                     ) : (

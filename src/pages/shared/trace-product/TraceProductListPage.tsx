@@ -10,12 +10,12 @@ import Button from "../../../components/common/button/Button";
 import Badge from "../../../components/common/badge/Badge";
 import Pagination from "../../../components/common/pagination/Pagination";
 import { TRACE_PRODUCT_LIST_CONFIG } from "../../../config/traceProductListConfig";
-import type { ExecutorRole, SupplyChainActivity, TraceProduct } from "../../../types/types";
+import type { Role, SupplyChainActivity, TraceProduct } from "../../../types/types";
 import { listTraceProducts } from "../../../api/traceApi";
 import { timestampToDate } from "../../../utils";
 
 interface Props {
-    role: ExecutorRole;
+    role: Role;
 }
 
 function TraceProductListPage({
@@ -122,39 +122,37 @@ function TraceProductListPage({
                     </div>
 
                     <div className="trace-product-toolbar-right">
-                        {config.showStatus && (
-                            <select
-                                className="trace-product-status-filter"
-                                value={activityFilter}
-                                onChange={(event) => {
-                                    setActivityFilter(event.target.value as SupplyChainActivity | "CREATED")
-                                }}
-                            >
-                                <option value={""}>
-                                    All Activity
-                                </option>
+                        <select
+                            className="trace-product-status-filter"
+                            value={activityFilter}
+                            onChange={(event) => {
+                                setActivityFilter(event.target.value as SupplyChainActivity | "CREATED")
+                            }}
+                        >
+                            <option value={""}>
+                                All Activity
+                            </option>
 
-                                <option value={"CREATED"}>
-                                    CREATED
-                                </option>
+                            <option value={"CREATED"}>
+                                CREATED
+                            </option>
 
-                                <option value={"HARVESTING"}>
-                                    HARVESTING
-                                </option>
+                            <option value={"HARVESTING"}>
+                                HARVESTING
+                            </option>
 
-                                <option value={"SHIPPING"}>
-                                    SHIPPING
-                                </option>
+                            <option value={"SHIPPING"}>
+                                SHIPPING
+                            </option>
 
-                                <option value={"RECEIVING"}>
-                                    RECEIVING
-                                </option>
+                            <option value={"RECEIVING"}>
+                                RECEIVING
+                            </option>
 
-                                <option value={"SELLING"}>
-                                    SELLING
-                                </option>
-                            </select>
-                        )}
+                            <option value={"SELLING"}>
+                                SELLING
+                            </option>
+                        </select>
 
                         <p className="trace-product-total">
                             Total {totalItems} trace products
@@ -182,11 +180,9 @@ function TraceProductListPage({
                                     Quantity
                                 </th>
 
-                                {config.showStatus && (
-                                    <th>
-                                        Current Activity
-                                    </th>
-                                )}
+                                <th>
+                                    Current Activity
+                                </th>
 
                                 <th>
                                     Created At
@@ -222,17 +218,15 @@ function TraceProductListPage({
                                             {traceProduct.quantity} {traceProduct.product.unitOfMeasure}
                                         </td>
 
-                                        {config.showStatus && (
-                                            <td>
-                                                <Badge
-                                                    variant={getBadgeVariant(
-                                                        traceProduct.currentActivity
-                                                    )}
-                                                >
-                                                    {traceProduct.currentActivity}
-                                                </Badge>
-                                            </td>
-                                        )}
+                                        <td>
+                                            <Badge
+                                                variant={getBadgeVariant(
+                                                    traceProduct.currentActivity
+                                                )}
+                                            >
+                                                {traceProduct.currentActivity}
+                                            </Badge>
+                                        </td>
 
                                         <td>
                                             {timestampToDate(traceProduct.createdAt)}

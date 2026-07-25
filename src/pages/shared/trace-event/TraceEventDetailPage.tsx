@@ -11,7 +11,7 @@ import Badge from "../../../components/common/badge/Badge";
 import Button from "../../../components/common/button/Button";
 import Loading from "../../../components/common/loading/Loading";
 import NotFound from "../../../components/common/not-found/NotFound";
-import type { Role, SupplyChainActivity, TraceEvent, ValidationStatus } from "../../../types/types";
+import type { Role, SupplyChainActivity, TraceEvent } from "../../../types/types";
 import { getTraceEventById } from "../../../api/traceApi";
 
 interface Props {
@@ -21,6 +21,8 @@ interface Props {
 function TraceEventDetailPage({
     role,
 }: Props) {
+    const walletAddress = localStorage.getItem("walletAddress");
+
     const navigate =
         useNavigate();
 
@@ -98,35 +100,19 @@ function TraceEventDetailPage({
         }
     }
 
-    function getValidationBadgeVariant(status: ValidationStatus) {
-        switch (status) {
-            case "VALID":
-                return (
-                    <Badge variant="success">
-                        {status}
-                    </Badge>
-                );
-
-            case "INVALID":
-                return (
-                    <Badge variant="danger">
-                        {status}
-                    </Badge>
-                );
-
-            case "PENDING":
-                return (
-                    <Badge variant="warning">
-                        {status}
-                    </Badge>
-                );
-
-            default:
-                return (
-                    <Badge>
-                        Unknown
-                    </Badge>
-                );
+    function getValidationBadgeVariant(isRecorded: boolean) {
+        if (isRecorded) {
+            return (
+                <Badge variant="success">
+                    RECORDED
+                </Badge>
+            );
+        } else {
+            return (
+                <Badge variant="warning">
+                    NOT RECORDED
+                </Badge>
+            );
         }
     }
 
@@ -210,11 +196,10 @@ function TraceEventDetailPage({
                                 Trace Event Information
                             </h2>
 
-                            {getValidationBadgeVariant(traceEvent.validationStatus)}
+                            {getValidationBadgeVariant(traceEvent.isRecorded)}
                         </div>
 
-                        {traceEvent.validationStatus ===
-                            "PENDING" && (
+                        {!traceEvent.isRecorded && traceEvent.actor.blockchainAddress === walletAddress && (
                             <Button
                                 size="sm"
                                 onClick={handleSign}

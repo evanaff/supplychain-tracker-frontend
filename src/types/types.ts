@@ -2,7 +2,7 @@
 export type Role = "GROWER" | "DISTRIBUTOR" | "RETAILER" | "ADMIN";
 export type ExecutorRole = "GROWER" | "DISTRIBUTOR" | "RETAILER";
 export type SupplyChainActivity = "HARVESTING" | "SHIPPING" | "RECEIVING" | "SELLING";
-export type ValidationStatus = "PENDING" | "VALID" | "INVALID";
+export type VerificationState = "IDLE" | "VERIFYING" | "SUCCESS" | "FAILED";
 
 // Interfaces
 export interface Location {
@@ -11,6 +11,7 @@ export interface Location {
     province: string;
     city: string;
     address: string;
+    allowedRole: Role;
 }
 
 export interface Actor {
@@ -43,7 +44,7 @@ export interface TraceEvent {
     supplyChainActivity: SupplyChainActivity;
     timestamp: string;
     destinationLocation?: Location;
-    validationStatus: ValidationStatus;
+    isRecorded: boolean;
     txHash: string; 
 
     actor: Actor,

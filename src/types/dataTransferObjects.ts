@@ -21,18 +21,20 @@ export interface EditActorDTO {
 };
 
 // Locations
-export interface CreateLocationDTO {
+export type CreateLocationDTO = {
   gln: string;
   name: string;
   province: string;
   city: string;
   address: string;
+  allowedRole: Role;
 };
 
 export interface ListLocationsQueryDTO {
   page?: number;
   limit?: number;
   search?: string;
+  filter?: Role;
 }
 
 export interface EditLocationDTO {

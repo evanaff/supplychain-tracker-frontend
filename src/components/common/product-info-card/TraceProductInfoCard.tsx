@@ -4,7 +4,6 @@ interface TraceProductInfoCardProps {
     imageUrl: string;
     productName: string;
     gtin: string;
-    quantity: number;
     unitOfMeasure: string;
 }
 
@@ -12,7 +11,6 @@ export default function TraceProductInfoCard({
     imageUrl,
     productName,
     gtin,
-    quantity,
     unitOfMeasure
 }: TraceProductInfoCardProps) {
     return (
@@ -38,16 +36,6 @@ export default function TraceProductInfoCard({
 
                         <span className="product-info-value">
                             {gtin}
-                        </span>
-                    </div>
-
-                    <div className="product-info-item">
-                        <span className="product-info-label">
-                            Quantity
-                        </span>
-
-                        <span className="product-info-value">
-                            {quantity} {unitOfMeasure}
                         </span>
                     </div>
 

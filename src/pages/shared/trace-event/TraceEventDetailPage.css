@@ -112,17 +112,18 @@
 
     margin-bottom: 8px;
 
-    color: #6b7280;
+    color: #111827;
 
-    font-size: 13px;
+    font-size: 15px;
+    font-weight: 600;
 }
 
 .event-info-group p {
     margin: 0;
 
-    color: #111827;
+    color: #6b7280;
 
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 600;
 }
 

@@ -39,6 +39,8 @@ function CreateTraceEventPage({
     const [initialLoading, setInitialLoading] = useState(true);
     
     const [submitLoading, setSubmitLoading] = useState(false);
+
+    const [isLocationOpen, setIsLocationOpen] = useState(false);
     
     useEffect(() => {
         if (!id) return;
@@ -62,9 +64,17 @@ function CreateTraceEventPage({
 
         const fetchLocations = async (search?: string) => {
             try {
+                let filter: Role | undefined;
+                if (role === "GROWER") {
+                    filter = "DISTRIBUTOR";
+                } else if (role === "DISTRIBUTOR") {
+                    filter = "RETAILER"
+                }
+
                 const res = await listLocations({
                     page: 1,
                     limit: 5,
+                    filter,
                     search
                 });
 
@@ -74,14 +84,11 @@ function CreateTraceEventPage({
             }
         };
 
-        const search = destinationLocationSearch.trim();
-        if (!search) return;
-        
         const timer = setTimeout(() => {
-            fetchLocations(search);
+            fetchLocations(destinationLocationSearch.trim() || undefined);
         }, 500);
         return () => clearTimeout(timer);
-    }, [destinationLocationSearch, eventType]);
+    }, [role, destinationLocationSearch, eventType]);
     function getTitle() {
         switch (
             eventType
@@ -242,14 +249,14 @@ function CreateTraceEventPage({
                     "SHIPPING" && (
                     <div className="shipping-location-section">
                         <label>
-                            Destination
-                            Location
+                            Destination Location
                         </label>
 
                         <input
                             type="text"
                             placeholder="Search..."
                             value={destinationLocationSearch}
+                            onFocus={() => setIsLocationOpen(true)}
                             onChange={(event) => {
                                 setDestinationLocationSearch(event.target.value);
 
@@ -258,7 +265,7 @@ function CreateTraceEventPage({
                         />
 
                         {
-                            destinationLocationSearch.trim() && locations.length > 0 && !destinationLocationGln && (
+                            isLocationOpen && locations.length > 0 && !destinationLocationGln && (
                             <div className="location-picker-list">
                                 {locations.map(
                                     (location) => (
@@ -276,9 +283,13 @@ function CreateTraceEventPage({
                                                 setDestinationLocationSearch(location.name);
 
                                                 setLocations([]);
+
+                                                setIsLocationOpen(false)
                                             }}
                                         >
-                                            {location.name}
+                                            {
+                                                `${location.name} (${location.allowedRole})`
+                                            }
                                         </button>
                                     )
                                 )}

@@ -30,22 +30,6 @@
     margin-bottom: 120px;
 }
 
-.brand-logo {
-    width: 64px;
-    height: 64px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, #22c55e, #15803d);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.brand-logo span {
-    color: white;
-    font-size: 20px;
-    font-weight: 700;
-}
-
 .brand-text h2 {
     margin: 0;
     font-size: 38px;
@@ -95,6 +79,9 @@
     padding: 64px;
     text-align: center;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+
+    display: flex;
+    flex-direction: column;
 }
 
 .metamask-icon-wrapper {
@@ -229,4 +216,55 @@
     .card-description {
         font-size: 18px;
     }
+}
+
+.wallet-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.wallet-info label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.wallet-address {
+    padding: 14px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    font-family: monospace;
+    font-size: 15px;
+    word-break: break-all;
+    color: #0f172a;
+}
+
+.change-wallet-button {
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+    border-radius: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: 0.2s ease;
+}
+
+.change-wallet-button:hover {
+    background: #f8fafc;
+}
+
+.wallet-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.wallet-placeholder {
+    height: 100%;
 }

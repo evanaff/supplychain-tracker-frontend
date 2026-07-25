@@ -3,18 +3,10 @@ import { timestampToDate } from "../../../utils";
 import "./TraceProductSummaryCard.css";
 
 interface TraceProductSummaryCardProps {
-    // traceProductId: string;
-    // currentStatus: string;
-    // lotNumber: string;
-    // createdAt: string;
     traceProduct: TraceProduct
 }
 
 export default function TraceProductSummaryCard({
-    // traceProductId,
-    // currentStatus,
-    // lotNumber,
-    // createdAt,
     traceProduct
 }: TraceProductSummaryCardProps) {
     return (

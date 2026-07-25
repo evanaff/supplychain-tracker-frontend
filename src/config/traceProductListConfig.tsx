@@ -1,8 +1,8 @@
-import type { ExecutorRole } from "../types/types";
+import type { Role } from "../types/types";
 
 export const TRACE_PRODUCT_LIST_CONFIG:
     Record<
-        ExecutorRole,
+        Role,
         {
             description: string;       
             actionButton?: {
@@ -12,9 +12,14 @@ export const TRACE_PRODUCT_LIST_CONFIG:
             viewDetailButton: {
                 path: string
             };
-            showStatus: boolean;
         }
     > = {
+        ADMIN: {
+            description: "List of all trace products",
+            viewDetailButton: {
+                path: "/admin/trace-products"
+            },
+        },
     GROWER: {
         description: "List of trace products created by you.",
         actionButton: {
@@ -24,7 +29,6 @@ export const TRACE_PRODUCT_LIST_CONFIG:
         viewDetailButton: {
             path: "/grower/trace-products"
         },
-        showStatus: true,
     },
 
     DISTRIBUTOR: {
@@ -32,7 +36,6 @@ export const TRACE_PRODUCT_LIST_CONFIG:
         viewDetailButton: {
             path: "/distributor/trace-products"
         },
-        showStatus: true,
     },
 
     RETAILER: {
@@ -40,6 +43,5 @@ export const TRACE_PRODUCT_LIST_CONFIG:
         viewDetailButton: {
             path: "/retailer/trace-products"
         },
-        showStatus: true,
     },
 };

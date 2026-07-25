@@ -7,7 +7,7 @@ import RoleLayout from "../../layouts/RoleLayout";
 
 import PageHeader from "../../components/layout/page-header/PageHeader";
 import Button from "../../components/common/button/Button";
-import { type Role } from "../../types/types";
+import { type Role, type Location } from "../../types/types";
 import { listLocations } from "../../api/locationApi";
 import toast from "react-hot-toast";
 import type { CreateActorDTO } from "../../types/dataTransferObjects";
@@ -21,55 +21,30 @@ function CreateActorPage() {
     const [blockchainAddress, setBlockchainAddress] =
         useState("");
 
-    const [name, setName] =
-        useState("");
+    const [name, setName] = useState("");
 
-    const [role, setRole] =
-        useState<Role>(
-            "GROWER"
-        );
+    const [role, setRole] =useState<Role>("GROWER");
 
-    const [locationSearch, setLocationSearch] =
-        useState("");
+    const [locationSearch, setLocationSearch] = useState("");
 
     const [locationGln, setLocationGln] = useState("");
 
-    const [locations, setLocations] =
-        useState<
-            {
-                label: string;
-                value: string;
-            }[]
-        >([]);
+    const [locations, setLocations] = useState<Location[]>([]);
+    
+    const [isLocationOpen, setIsLocationOpen] = useState(false);
 
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const fetchLocations = async (search?: string) => {
             try {
-                const response =
-                    await listLocations({
-                        page: 1,
-                        limit: 1000,
-                        search
-                    });
+                const res = await listLocations({
+                    page: 1,
+                    limit: 5,
+                    search
+                });
 
-                const options =
-                    response.data.locations.map(
-                        (
-                            location: {
-                                gln: string;
-                                name: string;
-                            }
-                        ) => ({
-                            label:
-                                location.name,
-                            value:
-                                location.gln,
-                        })
-                    );
-
-                setLocations(options);
+                setLocations(res.data.locations);
             } catch (error) {
                 console.error(error);
 
@@ -79,13 +54,8 @@ function CreateActorPage() {
             }
         };
 
-        const search = locationSearch.trim();
-        if (!search) {
-            return
-        }
-
         const timer = setTimeout(() => {
-            fetchLocations(locationSearch);
+            fetchLocations(locationSearch.trim() || undefined);
         }, 500);
 
         return () => clearTimeout(timer);
@@ -278,6 +248,7 @@ function CreateActorPage() {
                             type="text"
                             placeholder="Search location..."
                             value={locationSearch}
+                            onFocus={() => setIsLocationOpen(true)}
                             onChange={(event) => {
                                 setLocationSearch(
                                     event.target.value
@@ -287,34 +258,34 @@ function CreateActorPage() {
                         />
 
                         {
-                            locationSearch.trim() && locations.length > 0 && !locationGln && (
+                            isLocationOpen && locations.length > 0 && !locationGln && (
                             <div className="location-picker-list">
                                 {locations.map(
-                                    (locationOption) => (
+                                    (location) => (
                                         <button
                                             key={
-                                                locationOption.value
+                                                location.gln
                                             }
                                             type="button"
                                             className={`location-option ${
-                                                locationGln === locationOption.value
+                                                locationGln === location.gln
                                                     ? "selected"
                                                     : ""
                                             }`}
                                             onClick={() => {
                                                 setLocationGln(
-                                                    locationOption.value
+                                                    location.gln
                                                 );
 
-                                                setLocationSearch(
-                                                    locationOption.label
-                                                );
+                                                setLocationSearch(`${location.name} (${location.allowedRole})`);
 
                                                 setLocations([]);
+
+                                                setIsLocationOpen(false);
                                             }}
                                         >
                                             {
-                                                locationOption.label
+                                                `${location.name} (${location.allowedRole})`
                                             }
                                         </button>
                                     )

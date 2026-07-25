@@ -146,11 +146,6 @@ function DashboardPage() {
                     />
                 </div>
             </section>
-
-            <footer className="dashboard-footer">
-                © 2026 Supply Chain
-                Tracker
-            </footer>
         </RoleLayout>
     );
 }
