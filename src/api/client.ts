@@ -1,9 +1,9 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
-import { API_BASE_URL } from '@/config/env';
+import config from '@/config';
 import { getStoredAccessToken, getStoredRefreshToken, setModuleLevelTokens } from '@/context/AuthProvider';
 
 export const apiClient = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: config.api.baseUrl,
     headers: { 'Content-Type': 'application/json' },
     timeout: 15_000,
 });
@@ -87,7 +87,7 @@ apiClient.interceptors.response.use(
             try {
                 const { data } = await axios.post<{
                     data: { accessToken: string; refreshToken: string };
-                }>(`${API_BASE_URL}/api/auth/refresh`, { refreshToken });
+                }>(`${config.api.baseUrl}/api/auth/refresh`, { refreshToken });
 
                 const { accessToken: newAccess, refreshToken: newRefresh } = data.data;
 

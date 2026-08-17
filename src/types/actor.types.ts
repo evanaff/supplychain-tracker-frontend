@@ -1,10 +1,12 @@
 import type { Role } from './index';
+import type { Location } from './location.types';
 
 export interface Actor {
     blockchainAddress: string;
     name: string;
     role: Role;
     location: Location;
+    txHash?: string;
 }
 
 export interface ActorSnapshot {
