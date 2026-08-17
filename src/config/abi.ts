@@ -57,9 +57,9 @@ export const SMART_CONTRACT_ABI = [
     {
         "inputs": [
             {
-                "internalType": "string",
-                "name": "_traceEventId",
-                "type": "string"
+            "internalType": "string",
+            "name": "_traceEventId",
+            "type": "string"
             }
         ],
         "name": "getTraceEventById",
@@ -77,7 +77,7 @@ export const SMART_CONTRACT_ABI = [
                         "type": "bytes32"
                     }
                 ],
-                "internalType": "struct ProductTracker.TraceEvent",
+                "internalType": "struct SupplyChainTracker.TraceEvent",
                 "name": "",
                 "type": "tuple"
             }
@@ -122,4 +122,4 @@ export const SMART_CONTRACT_ABI = [
         "stateMutability": "view",
         "type": "function"
     }
-]
+  ];

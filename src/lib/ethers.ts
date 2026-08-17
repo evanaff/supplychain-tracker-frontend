@@ -3,7 +3,7 @@ import { BrowserProvider, type JsonRpcSigner } from 'ethers';
 export function getBrowserProvider(): BrowserProvider {
     if (!window.ethereum) {
         throw new Error(
-            'No Ethereum wallet detected. Please install MetaMask or another Web3 wallet.',
+            'No Ethereum wallet detected. Please install MetaMask.',
         );
     }
     return new BrowserProvider(window.ethereum as ConstructorParameters<typeof BrowserProvider>[0]);

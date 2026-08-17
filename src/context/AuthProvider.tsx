@@ -47,7 +47,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                     isAuthenticated: true,
                 };
             } catch {
-                // Corrupt storage — start fresh
+                // Corrupt storage - start fresh
             }
         }
 

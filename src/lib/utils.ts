@@ -1,3 +1,5 @@
+import config from '@/config';
+import type { SiweMessagePayload } from '@/types/auth.types';
 import type { SupplyChainActivity } from '@/types/index';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -79,4 +81,14 @@ export function truncate(str: string, maxLength: number): string {
 
 export function cn(...inputs: ClassValue[]): string {
     return twMerge(clsx(inputs));
+}
+
+export function buildSiwePayload(address: string): SiweMessagePayload {
+    return {
+        domain: config.app.domain,
+        address,
+        uri: window.location.origin,
+        version: '1',
+        chainId: config.chain.id,
+    };
 }
