@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { AsyncLocationCombobox } from '@/components/shared/AsyncLocationCombobox';
+import { LocationCombobox } from '@/components/shared/LocationCombobox';
 import {
     Select,
     SelectContent,
@@ -70,7 +70,7 @@ export default function CreateActorPage() {
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Add Actor</h1>
                         <p className="text-sm text-muted-foreground mt-1">
-                            Register a new supply chain participant into the system.
+                            Register a new supply chain participant.
                         </p>
                     </div>
                 </div>
@@ -103,7 +103,7 @@ export default function CreateActorPage() {
                                         name="locationGln"
                                         control={control}
                                         render={({ field }) => (
-                                            <AsyncLocationCombobox
+                                            <LocationCombobox
                                                 id="locationGln"
                                                 value={field.value}
                                                 onChange={field.onChange}

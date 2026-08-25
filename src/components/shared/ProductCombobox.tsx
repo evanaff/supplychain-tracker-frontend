@@ -1,55 +1,55 @@
 import React, { useState, useRef, useEffect, type KeyboardEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { locationsApi } from '@/api/locations.api';
+import { productsApi } from '@/api/products.api';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Input } from '@/components/ui/input';
 import { Loader2, X, Search, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Location } from '@/types/location.types';
+import type { Product } from '@/types/product.types';
 
-interface AsyncLocationComboboxProps {
+interface ProductComboboxProps {
     id?: string;
     value?: string;
     onChange: (value: string) => void;
     error?: boolean;
 }
 
-export function AsyncLocationCombobox({
+export function ProductCombobox({
     id,
     value = '',
     onChange,
     error,
-}: AsyncLocationComboboxProps) {
+}: ProductComboboxProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [prevValue, setPrevValue] = useState(value);
-    const [prevLocationsLength, setPrevLocationsLength] = useState(0);
+    const [prevProductsLength, setPrevProductsLength] = useState(0);
 
     const containerRef = useRef<HTMLDivElement>(null);
 
-    if (value !== prevValue) {
-        setPrevValue(value);
-        if (!value) {
-        setInputValue('');
+        if (value !== prevValue) {
+                setPrevValue(value);
+                if (!value) {
+                setInputValue('');
+                }
         }
-    }
 
     const debouncedSearch = useDebounce(inputValue, 300);
 
     const { data, isLoading } = useQuery({
-        queryKey: ['locations-search', debouncedSearch],
+        queryKey: ['products-search', debouncedSearch],
         queryFn: () =>
-            locationsApi
+            productsApi
                 .list({ search: debouncedSearch || undefined, limit: 10 })
-                .then((r) => r.data.data.locations),
+                .then((r) => r.data.data.products),
         enabled: isOpen,
     });
 
-    const locations = data || [];
+    const products = data || [];
 
-    if (locations.length !== prevLocationsLength) {
-        setPrevLocationsLength(locations.length);
+    if (products.length !== prevProductsLength) {
+        setPrevProductsLength(products.length);
         setSelectedIndex(0);
     }
 
@@ -63,9 +63,9 @@ export function AsyncLocationCombobox({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleSelect = (loc: Location) => {
-        setInputValue(loc.name);
-        onChange(loc.gln);
+    const handleSelect = (product: Product) => {
+        setInputValue(product.varietyName);
+        onChange(product.gtin);
         setIsOpen(false);
     };
 
@@ -80,7 +80,7 @@ export function AsyncLocationCombobox({
         switch (e.key) {
             case 'ArrowDown':
                 e.preventDefault();
-                setSelectedIndex((prev) => (prev < locations.length - 1 ? prev + 1 : prev));
+                setSelectedIndex((prev) => (prev < products.length - 1 ? prev + 1 : prev));
                 break;
             case 'ArrowUp':
                 e.preventDefault();
@@ -88,8 +88,8 @@ export function AsyncLocationCombobox({
                 break;
             case 'Enter':
                 e.preventDefault();
-                if (locations[selectedIndex]) {
-                    handleSelect(locations[selectedIndex]);
+                if (products[selectedIndex]) {
+                    handleSelect(products[selectedIndex]);
                 }
                 break;
             case 'Escape':
@@ -112,12 +112,12 @@ export function AsyncLocationCombobox({
                 <Input
                     id={id}
                     type="text"
-                    placeholder="Search location by name or GLN..."
+                    placeholder="Search product by name..."
                     value={inputValue}
                     onChange={(e) => {
                         setInputValue(e.target.value);
                         setIsOpen(true);
-                        onChange('');
+                        onChange(''); // Clear the GTIN as soon as they type to ensure they select a valid product
                     }}
                     onFocus={() => setIsOpen(true)}
                     onKeyDown={handleKeyDown}
@@ -143,26 +143,26 @@ export function AsyncLocationCombobox({
             </div>
 
             {isOpen && (
-                <div className="absolute z-50 w-full mt-1 bg-popover text-popover-foreground rounded-md border shadow-md max-h-60 overflow-y-auto animate-in fade-in-0 zoom-in-95">
-                    {isLoading && locations.length === 0 ? (
+                <div className="absolute z-50 w-full mt-1 bg-popover text-popover-foreground rounded-md border shadow-md max-h-[168px] overflow-y-auto animate-in fade-in-0 zoom-in-95">
+                    {isLoading && products.length === 0 ? (
                         <div className="p-4 text-center text-sm text-muted-foreground">Searching...</div>
-                    ) : locations.length === 0 ? (
-                        <div className="p-4 text-center text-sm text-muted-foreground">No locations found.</div>
+                    ) : products.length === 0 ? (
+                        <div className="p-4 text-center text-sm text-muted-foreground">No products found.</div>
                     ) : (
                         <ul className="p-1" role="listbox">
-                            {locations.map((loc, index) => {
+                            {products.map((product, index) => {
                                 const isSelected = selectedIndex === index;
-                                const isCurrentValue = value === loc.gln;
+                                const isCurrentValue = value === product.gtin;
 
                                 return (
                                     <li
-                                        key={loc.gln}
+                                        key={product.gtin}
                                         role="option"
                                         aria-selected={isSelected}
                                         onMouseDown={(e) => {
                                             e.preventDefault();
                                         }}
-                                        onClick={() => handleSelect(loc)}
+                                        onClick={() => handleSelect(product)}
                                         onMouseEnter={() => setSelectedIndex(index)}
                                         className={cn(
                                             'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors',
@@ -172,17 +172,11 @@ export function AsyncLocationCombobox({
                                     >
                                         <div className="flex flex-col gap-1 w-full">
                                             <div className="flex items-center justify-between w-full">
-                                                <span>{loc.name}</span>
+                                                <span>{product.varietyName}</span>
                                                 {isCurrentValue && <Check className="h-4 w-4 text-primary" />}
                                             </div>
                                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                <span>GLN: {loc.gln}</span>
-                                                {loc.allowedRole && (
-                                                    <>
-                                                        <span>&bull;</span>
-                                                        <span className="capitalize">{loc.allowedRole.toLowerCase()}</span>
-                                                    </>
-                                                )}
+                                                <span>GTIN: {product.gtin}</span>
                                             </div>
                                         </div>
                                     </li>

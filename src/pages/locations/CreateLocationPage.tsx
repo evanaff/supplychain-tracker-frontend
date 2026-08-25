@@ -68,7 +68,7 @@ export default function CreateLocationPage() {
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Add Location</h1>
                         <p className="text-sm text-muted-foreground mt-1">
-                            Register a new physical location for a participant.
+                            Register a new location.
                         </p>
                     </div>
                 </div>

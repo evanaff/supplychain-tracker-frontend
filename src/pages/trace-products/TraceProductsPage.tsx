@@ -2,7 +2,7 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, ExternalLink } from 'lucide-react';
+import { Plus, ExternalLink, RefreshCw } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,6 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { ErrorStateWithRetry } from '@/components/shared/ErrorState';
 import { RoleGuard } from '@/components/shared/RoleGuard';
 import { traceProductsApi } from '@/api/trace-products.api';
-import { productsApi } from '@/api/products.api';
 import { formatDateTime } from '@/lib/utils';
 import { usePagination } from '@/hooks/usePagination';
 import { useAuth } from '@/hooks/useAuth';
@@ -47,6 +46,7 @@ import {
 } from './schemas/traceProduct.schema';
 import config from '@/config';
 import type { SupplyChainActivity } from '@/types/index';
+import { ProductCombobox } from '@/components/shared/ProductCombobox';
 
 const traceEventSequence = [
     'CREATED',
@@ -72,18 +72,12 @@ export default function TraceProductsPage() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const { isGrower } = useAuth();
 
-    const { data, isLoading, isError, error, refetch } = useQuery({
+    const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
         queryKey: ['trace-products', page, limit, search, statusFilter],
         queryFn: () =>
             traceProductsApi
                 .list({ page, limit, search: search || undefined, filter: statusFilter || undefined })
                 .then((r) => r.data.data),
-    });
-
-    const { data: productsData } = useQuery({
-        queryKey: ['products', 1, 100],
-        queryFn: () => productsApi.list({ page: 1, limit: 100 }).then((r) => r.data.data),
-        enabled: dialogOpen,
     });
 
     const {
@@ -107,7 +101,6 @@ export default function TraceProductsPage() {
 
     return (
         <>
-            
             <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
@@ -149,6 +142,16 @@ export default function TraceProductsPage() {
                             ))}
                         </SelectContent>
                     </Select>
+                    <Button
+                        id="refresh-trace-products"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => void refetch()}
+                        disabled={isFetching}
+                        title="Refresh data"
+                    >
+                        <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+                    </Button>
                 </div>
 
                 {isError ? (
@@ -231,18 +234,12 @@ export default function TraceProductsPage() {
                                     name="gtin"
                                     control={control}
                                     render={({ field }) => (
-                                        <Select onValueChange={field.onChange} value={field.value}>
-                                            <SelectTrigger id="gtin-select">
-                                                <SelectValue placeholder="Select product…" />
-                                            </SelectTrigger>
-                                            <SelectContent className="min-w-[350px]">
-                                                {productsData?.products.map((p) => (
-                                                    <SelectItem key={p.gtin} value={p.gtin}>
-                                                        {p.varietyName} ({p.gtin})
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                    <ProductCombobox
+                                    id="gtin-select"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={!!errors.gtin}
+                                    />
                                     )}
                                 />
                                 {errors.gtin && (

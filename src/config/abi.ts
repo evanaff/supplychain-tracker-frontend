@@ -3,11 +3,30 @@ export const SMART_CONTRACT_ABI = [
         "inputs": [
             {
                 "internalType": "address",
-                "name": "_executor",
+                "name": "",
                 "type": "address"
             }
         ],
-        "name": "addExecutor",
+        "name": "actors",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_actor",
+                "type": "address"
+            }
+        ],
+        "name": "addActor",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -38,28 +57,9 @@ export const SMART_CONTRACT_ABI = [
     {
         "inputs": [
             {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "name": "executors",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-            "internalType": "string",
-            "name": "_traceEventId",
-            "type": "string"
+                "internalType": "string",
+                "name": "_traceEventId",
+                "type": "string"
             }
         ],
         "name": "getTraceEventById",
@@ -101,6 +101,19 @@ export const SMART_CONTRACT_ABI = [
     {
         "inputs": [
             {
+                "internalType": "address",
+                "name": "_actor",
+                "type": "address"
+            }
+        ],
+        "name": "removeActor",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "string",
                 "name": "",
                 "type": "string"
@@ -122,4 +135,4 @@ export const SMART_CONTRACT_ABI = [
         "stateMutability": "view",
         "type": "function"
     }
-  ];
+];

@@ -5,6 +5,13 @@ import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,  
+} from '@/components/ui/select';
 
 import {
     Table,
@@ -20,9 +27,18 @@ import { Pagination } from '@/components/shared/Pagination';
 import { ErrorStateWithRetry } from '@/components/shared/ErrorState';
 import { locationsApi } from '@/api/locations.api';
 import { usePagination } from '@/hooks/usePagination';
+import { useDebounce } from '@/hooks/useDebounce';
+import type { AllowedRole } from '@/types/location.types';
 
 import config from '@/config';
 import { useAuth } from '@/hooks/useAuth';
+
+const FILTER_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: '', label: 'All roles' },
+  { value: 'GROWER', label: 'GROWER' },
+  { value: 'DISTRIBUTOR', label: 'DISTRIBUTOR' },
+  { value: 'RETAILER', label: 'RETAILER' },
+];
 
 const roleBadgeClass: Record<string, string> = {
     GROWER: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-transparent',
@@ -37,11 +53,14 @@ export default function LocationsPage() {
     const { isAdmin } = useAuth();
     const { page, limit, setPage } = usePagination();
     const [search, setSearch] = useState('');
+    const [roleFilter, setRoleFilter] = useState<string>('');
+
+    const debouncedSearch = useDebounce(search, 300);
 
     const { data, isLoading, isError, error, refetch } = useQuery({
-        queryKey: ['locations', page, limit, search],
+        queryKey: ['locations', page, limit, debouncedSearch, roleFilter],
         queryFn: () =>
-            locationsApi.list({ page, limit, search: search || undefined }).then((r) => r.data.data),
+            locationsApi.list({ page, limit, search: debouncedSearch || undefined, filter: roleFilter as AllowedRole || undefined }).then((r) => r.data.data),
     });
 
     if (!isAdmin) {
@@ -56,7 +75,7 @@ export default function LocationsPage() {
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Locations</h1>
                         <p className="text-muted-foreground text-sm">
-                            Manage supply chain locations
+                            Supply chain locations
                         </p>
                     </div>
                     <Button id="create-location-button" onClick={() => navigate('/locations/new')} className="gap-2">
@@ -65,11 +84,26 @@ export default function LocationsPage() {
                     </Button>
                 </div>
 
+                {/* Filters */}
+                <div className="flex flex-col sm:flex-row gap-3">
                 <SearchBar
                     placeholder="Search by name or GLN…"
                     onSearch={setSearch}
-                    className="max-w-sm"
+                    className="flex-1 max-w-sm"
                 />
+                <Select value={roleFilter} onValueChange={(val) => setRoleFilter(val ?? '')}>
+                    <SelectTrigger className="w-full sm:w-44" id="role-filter">
+                    <SelectValue placeholder="Filter by role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    {FILTER_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                        </SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+                </div>
 
                 {isError ? (
                     <ErrorStateWithRetry onRetry={() => void refetch()} description={error?.message} />

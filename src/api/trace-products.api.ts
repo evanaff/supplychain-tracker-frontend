@@ -1,6 +1,6 @@
 import { apiClient } from './client';
 import type { ApiResponse, PaginatedResponse } from '@/types/api.types';
-import type { TraceHistory, TraceVerificationResult } from '@/types/trace-event.types';
+import type { ProductHistory, TraceVerificationResult } from '@/types/trace-event.types';
 import type {
     CreateTraceProductPayload,
     TraceProduct,
@@ -27,7 +27,7 @@ export const traceProductsApi = {
 
     // Public - no auth required
     getHistory: (id: string) =>
-        apiClient.get<ApiResponse<TraceHistory>>(`/api/trace-products/${id}/history`),
+        apiClient.get<ApiResponse<ProductHistory>>(`/api/trace-products/${id}/history`),
 
     // Public - no auth required
     verify: (id: string) =>

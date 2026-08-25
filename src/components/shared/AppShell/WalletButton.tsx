@@ -62,7 +62,7 @@ export function WalletButton() {
                 />
                 <DropdownMenuContent align="end" className="w-56">
                     <div className="px-3 py-2">
-                        <p className="text-xs text-muted-foreground">Connected as</p>
+                        <p className="text-xs text-muted-foreground">Signed in as</p>
                         <p className="font-semibold text-sm">{actor.name}</p>
                         <p className="text-xs text-muted-foreground font-mono">
                             {shortenAddress(actor.address, 6)}

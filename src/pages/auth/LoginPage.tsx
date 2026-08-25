@@ -1,7 +1,7 @@
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wallet, AlertTriangle, ExternalLink, Loader2, AppleIcon, ShieldCheck } from 'lucide-react';
+import { Wallet, AlertTriangle, ExternalLink, Loader2, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,6 +11,7 @@ import { getSigner } from '@/lib/ethers';
 import { buildSiwePayload } from '@/lib/utils';
 import config from '@/config';
 import type { AuthActor } from '@/types/auth.types';
+import logo from '@/assets/logo.svg';
 
 type LoginStep = 'connect' | 'sign' | 'verifying' | 'error';
 
@@ -102,13 +103,15 @@ export default function LoginPage() {
                 <div className="w-full max-w-md space-y-6 animate-slide-up">
                     {/* Brand header */}
                     <div className="flex flex-col items-center gap-3 text-center">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
-                            <AppleIcon className="h-8 w-8 text-primary-foreground" />
-                        </div>
+                        <img 
+                            src={logo} 
+                            alt="Logo"
+                            className="h-20 w-20 drop-shadow-md" 
+                        />
                         <div>
                             <h1 className="text-2xl font-bold tracking-tight">{config.app.name}</h1>
                             <p className="text-muted-foreground text-sm">
-                                Blockchain-powered supply chain traceability
+                                Fruits & vegetables supply chain traceability
                             </p>
                         </div>
                     </div>
@@ -118,7 +121,7 @@ export default function LoginPage() {
                         <CardHeader className="space-y-1 pb-4">
                             <CardTitle className="text-xl">Sign In</CardTitle>
                             <CardDescription>
-                                Connect your Ethereum wallet to authenticate. Your wallet address must be
+                                Connect your wallet to authenticate. Your wallet address must be
                                 registered by an administrator.
                             </CardDescription>
                         </CardHeader>
@@ -173,11 +176,6 @@ export default function LoginPage() {
                                 )}
                                 {stepLabel[step]}
                             </Button>
-
-                            <p className="text-center text-xs text-muted-foreground">
-                                By signing in, you confirm you are an authorized participant in this supply chain
-                                network.
-                            </p>
                         </CardContent>
                     </Card>
 

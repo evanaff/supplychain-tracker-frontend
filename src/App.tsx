@@ -20,7 +20,7 @@ const CreateProductPage = lazy(() => import('./pages/products/CreateProductPage'
 const TraceProductsPage = lazy(() => import('./pages/trace-products/TraceProductsPage'));
 const TraceProductDetailPage = lazy(() => import('./pages/trace-products/TraceProductDetailPage'));
 const ScanPage = lazy(() => import('./pages/scan/ScanPage'));
-const TraceHistoryPage = lazy(() => import('./pages/trace-history/TraceHistoryPage'));
+const ProductHistoryPage = lazy(() => import('./pages/product-history/ProductHistoryPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function PageLoader() {
@@ -47,7 +47,7 @@ export default function App() {
             <Routes>
                 {/* Public routes */}
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/trace-history/:id" element={<TraceHistoryPage />} />
+                <Route path="/trace-history/:id" element={<ProductHistoryPage />} />
 
                 {/* Protected routes inside AppShell */}
                 <Route
