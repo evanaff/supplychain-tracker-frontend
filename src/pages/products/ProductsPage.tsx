@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Package, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import { SearchBar } from '@/components/shared/SearchBar';
 import { Pagination } from '@/components/shared/Pagination';
 import { ErrorStateWithRetry } from '@/components/shared/ErrorState';
@@ -43,9 +42,9 @@ function ProductCard({ product }: { product: Product }) {
                             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                                 GTIN
                             </span>
-                            <Badge variant="secondary" className="px-1.5 py-0 text-[10px] font-mono font-normal w-fit">
+                            <span className="text-[11px] font-medium text-foreground">
                                 {product.gtin}
-                            </Badge>
+                            </span>
                         </div>
                         <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -97,7 +96,7 @@ export default function ProductsPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Products</h1>
-                        <p className="text-muted-foreground text-sm">Browse the traceable product catalog.</p>
+                        <p className="text-muted-foreground text-sm">Traceable product catalog.</p>
                     </div>
                     {isAdmin && (
                         <Button onClick={() => navigate('/products/new')} className="shrink-0">

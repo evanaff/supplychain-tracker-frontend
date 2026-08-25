@@ -3,4 +3,6 @@ export interface DashboardStats {
     totalDistributors: number;
     totalRetailers: number;
     totalLocations: number;
+    totalProducts: number,
+    totalTraceProducts: number
 }

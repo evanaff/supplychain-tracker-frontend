@@ -3,14 +3,14 @@ import {
     LayoutDashboard,
     Users,
     MapPin,
-    Package,
-    ArrowLeftRight,
     ChevronRight,
-    AppleIcon,
     ScanLine,
+    Route,
+    Apple,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.svg';
 
 interface NavItem {
     to: string;
@@ -21,10 +21,10 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     { to: '/', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" />, roles: ['ADMIN'] },
+    { to: '/trace-products', label: 'Trace Products', icon: <Route className="h-4 w-4" /> },
+    { to: '/products', label: 'Products', icon: <Apple className="h-4 w-4" /> },
     { to: '/actors', label: 'Actors', icon: <Users className="h-4 w-4" />, roles: ['ADMIN'] },
     { to: '/locations', label: 'Locations', icon: <MapPin className="h-4 w-4" />, roles: ['ADMIN'] },
-    { to: '/trace-products', label: 'Trace Products', icon: <ArrowLeftRight className="h-4 w-4" /> },
-    { to: '/products', label: 'Products', icon: <Package className="h-4 w-4" /> },
     { to: '/scan', label: 'Scan', icon: <ScanLine className="h-4 w-4" />, roles: ['GROWER', 'DISTRIBUTOR', 'RETAILER'] },
 ];
 
@@ -43,12 +43,14 @@ export function Sidebar({ onClose }: SidebarProps) {
         <aside className="app-sidebar flex flex-col h-full w-64 shrink-0">
             {/* Brand */}
             <div className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                    <AppleIcon className="h-5 w-5 text-primary-foreground" />
-                </div>
+                <img 
+                    src={logo} 
+                    alt="Logo" 
+                    className="h-12 w-12 rounded-lg" 
+                />
                 <div>
-                    <p className="text-sm font-bold text-sidebar-foreground leading-tight">Supply Chain</p>
-                    <p className="text-xs text-sidebar-foreground/60 leading-tight">Tracker</p>
+                    <p className="text-sl font-bold text-sidebar-foreground leading-tight">Supply Chain</p>
+                    <p className="text-xm text-sidebar-foreground/60 leading-tight">Tracker</p>
                 </div>
             </div>
 

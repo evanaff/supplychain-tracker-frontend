@@ -78,7 +78,7 @@ export default function ActorsPage() {
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Actors</h1>
                         <p className="text-muted-foreground text-sm">
-                            Manage registered supply chain participants.
+                            Registered supply chain participants.
                         </p>
                     </div>
                     <Button id="create-actor-button" onClick={() => navigate('/actors/new')} className="gap-2">

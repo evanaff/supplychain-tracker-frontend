@@ -5,9 +5,6 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { ScanLine, SwitchCamera, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { traceProductsApi } from '@/api/trace-products.api';
-import { isAxiosError } from 'axios';
 import config from '@/config';
 
 export default function ScanPage() {
@@ -19,9 +16,6 @@ export default function ScanPage() {
     const [cameras, setCameras] = useState<any[]>([]);
     const [currentCameraId, setCurrentCameraId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [manualId, setManualId] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [manualError, setManualError] = useState<string | null>(null);
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const containerId = 'qr-reader';
     
@@ -120,34 +114,6 @@ export default function ScanPage() {
         setCurrentCameraId(cameras[nextIndex].id);
     };
 
-    const handleManualSubmit = async () => {
-        const id = manualId.trim();
-        if (!id) {
-            setManualError('Trace Product ID is required.');
-            return;
-        }
-        
-        setManualError(null);
-        setIsSubmitting(true);
-        
-        try {
-            await traceProductsApi.getById(id);
-            
-            if (scannerRef.current?.isScanning) {
-                scannerRef.current.stop().catch(console.error);
-            }
-            navigate(`/trace-products/${id}`);
-        } catch (err) {
-            if (isAxiosError(err) && err.response) {
-                setManualError(err.response.data.message || 'Trace Product not found.');
-            } else {
-                setManualError('An unexpected error occurred. Please try again.');
-            }
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
     let currentCameraName = 'Unknown Camera';
     if (hasPermission !== null) {
         if (cameras.length === 0) {
@@ -218,58 +184,6 @@ export default function ScanPage() {
                         <p>{error}</p>
                     </div>
                 )}
-
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-border" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">Or</span>
-                    </div>
-                </div>
-
-                <Card className="border-border/50">
-                    <CardHeader className="pb-4">
-                        <CardTitle className="text-lg">Manual Entry</CardTitle>
-                        <CardDescription>
-                            Enter the Trace Product ID manually
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Input
-                                placeholder="Trace Product ID"
-                                value={manualId}
-                                onChange={(e) => {
-                                    setManualId(e.target.value);
-                                    if (manualError) setManualError(null);
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && manualId.trim() && !isSubmitting) {
-                                        handleManualSubmit();
-                                    }
-                                }}
-                            />
-                            {manualError && (
-                                <p className="text-sm text-destructive font-medium">{manualError}</p>
-                            )}
-                        </div>
-                        <Button 
-                            className="w-full" 
-                            onClick={handleManualSubmit}
-                            disabled={!manualId.trim() || isSubmitting}
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Verifying...
-                                </>
-                            ) : (
-                                'Go to Trace Product'
-                            )}
-                        </Button>
-                    </CardContent>
-                </Card>
             </div>
         </>
     );

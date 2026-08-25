@@ -19,7 +19,7 @@ export function AppShell() {
 
             {/* Mobile sidebar */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-                <SheetContent side="left" className="p-0 w-64">
+                <SheetContent side="left" className="p-0 w-64 border-r-0 text-sidebar-foreground [&_[data-slot=sheet-close]]:text-sidebar-foreground/70 [&_[data-slot=sheet-close]:hover]:text-sidebar-foreground [&_[data-slot=sheet-close]:hover]:bg-sidebar-accent/20" style={{ background: 'hsl(var(--sidebar))' }}>
                     <Sidebar onClose={() => setMobileOpen(false)} />
                 </SheetContent>
             </Sheet>

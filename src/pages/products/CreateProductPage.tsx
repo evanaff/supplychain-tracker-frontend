@@ -74,7 +74,7 @@ export default function CreateProductPage() {
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Add Product</h1>
                         <p className="text-sm text-muted-foreground mt-1">
-                            Create a new traceable product into the catalog.
+                            Create a new traceable product.
                         </p>
                     </div>
                 </div>

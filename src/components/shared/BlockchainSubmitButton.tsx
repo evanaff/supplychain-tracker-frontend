@@ -1,13 +1,14 @@
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useBlockchainSubmit } from '@/hooks/useBlockchainSubmit';
-import { Loader2, CheckCircle2, AlertTriangle, Link } from 'lucide-react';
+import { Loader2, AlertTriangle, Link } from 'lucide-react';
 
 interface BlockchainSubmitButtonProps {
     eventId: string;
     invalidateKeys?: string[][];
     onSuccess?: () => void;
     className?: string;
+    disabled?: boolean;
 }
 
 const statusLabel: Record<string, string> = {
@@ -26,14 +27,18 @@ export function BlockchainSubmitButton({
     invalidateKeys,
     onSuccess,
     className,
+    disabled,
 }: BlockchainSubmitButtonProps) {
-    const { submit, status, error, isPending, isSuccess } = useBlockchainSubmit({
+    const { submit, reset, status, error, isPending } = useBlockchainSubmit({
         invalidateKeys,
     });
 
     const handleClick = async () => {
         const ok = await submit(eventId);
-        if (ok) onSuccess?.();
+        if (ok) {
+        onSuccess?.();
+        reset();
+        }
     };
 
     return (
@@ -41,17 +46,12 @@ export function BlockchainSubmitButton({
             <Button
                 id={`blockchain-submit-${eventId}`}
                 onClick={() => void handleClick()}
-                disabled={isPending || isSuccess}
-                variant={isSuccess ? 'secondary' : 'default'}
-                className={cn(
-                    'gap-2 transition-all',
-                    isSuccess && 'text-emerald-700',
-                )}
+                disabled={disabled || isPending}
+                className="gap-2 transition-all"
             >
                 {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isSuccess && <CheckCircle2 className="h-4 w-4" />}
                 {status === 'error' && <AlertTriangle className="h-4 w-4" />}
-                {!isPending && !isSuccess && status !== 'error' && (
+                {!isPending && status !== 'error' && (
                     <Link className="h-4 w-4" />
                 )}
                 {statusLabel[status] ?? 'Submit to Blockchain'}

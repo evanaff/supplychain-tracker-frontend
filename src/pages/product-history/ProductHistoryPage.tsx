@@ -19,8 +19,8 @@ const ROLE_BADGE_COLORS: Record<string, string> = {
     RETAILER: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-transparent',
 };
 
-export default function TraceHistoryPage() {
-    useDocumentTitle(`Trace History - ${config.app.name}`);
+export default function ProductHistoryPage() {
+    useDocumentTitle(`Product History - ${config.app.name}`);
 
     const { id } = useParams<{ id: string }>();
     const [verificationResult, setVerificationResult] = useState<TraceVerificationResult | null>(null);
@@ -77,8 +77,8 @@ Thank you.`);
                     name="description"
                     content={
                         tp
-                            ? `Trace history for lot ${tp.lotNumber} - ${tp.product?.varietyName ?? tp.product.gtin}. View full supply chain journey and blockchain verification.`
-                            : 'View supply chain trace history and blockchain verification.'
+                            ? `Product history for lot ${tp.lotNumber} - ${tp.product?.varietyName ?? tp.product.gtin}. View full supply chain journey and blockchain verification.`
+                            : 'View supply chain product history and blockchain verification.'
                     }
                 />
             <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -90,7 +90,7 @@ Thank you.`);
                         </div>
                         <div>
                             <p className="text-sm font-bold leading-tight">{config.app.name}</p>
-                            <p className="text-xs text-muted-foreground leading-tight">Supply Chain Trace</p>
+                            <p className="text-xs text-muted-foreground leading-tight">Product History</p>
                         </div>
                     </div>
                 </header>
@@ -253,7 +253,7 @@ Thank you.`);
 
                                     {!verificationResult && !verifyMutation.isPending && (
                                         <p className="text-sm text-muted-foreground">
-                                            Click "Verify Full History" to check the integrity of all events for this product lot against the blockchain.
+                                            Click "Verify Full History" to check the integrity of all events for this product lot.
                                         </p>
                                     )}
 
@@ -315,7 +315,7 @@ Thank you.`);
                                     <CardTitle className="text-lg">Event Timeline</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <EventTimeline events={events} verificationResult={verificationResult} />
+                                    <EventTimeline events={events} verificationResult={verificationResult} hideChainStatus={true} />
                                 </CardContent>
                             </Card>
                         </>

@@ -15,14 +15,14 @@ export const traceEventsApi = {
             `/api/trace-events/${id}`,
         ),
 
-    getDataHash: (id: string) =>
-        apiClient.get<ApiResponse<{ dataHash: string }>>(
-            `/api/trace-events/${id}/data-hash`,
+    getEventHash: (id: string) =>
+        apiClient.get<ApiResponse<{ dataHash: string, messageHash: string }>>(
+            `/api/trace-events/${id}/hash`,
         ),
 
     saveTxHash: (id: string, txHash: string) =>
         apiClient.post<ApiResponse<void>>(
-            `/api/trace-events/${id}/save-hash`,
+            `/api/trace-events/${id}/save-txhash`,
             { txHash },
         ),
 

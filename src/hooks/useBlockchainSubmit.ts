@@ -38,20 +38,20 @@ export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
                 }
 
                 // Get Data Hash
-                const hashRes = await traceEventsApi.getDataHash(eventId);
-                const { dataHash } = hashRes.data.data;
+                const hashRes = await traceEventsApi.getEventHash(eventId);
+                const { dataHash, messageHash } = hashRes.data.data;
 
                 const signer = await getSigner();
-                const actor = await signer.getAddress();
+                // const actor = await signer.getAddress();
 
                 // Generate Message Hash & Sign
                 setStatus('waiting-signature');
                 
-                const encoded = ethers.AbiCoder.defaultAbiCoder().encode(
-                    ['string', 'address', 'bytes32'],
-                    [eventId, actor, dataHash]
-                );
-                const messageHash = ethers.keccak256(encoded);
+                // const encoded = ethers.AbiCoder.defaultAbiCoder().encode(
+                //     ['string', 'address', 'bytes32'],
+                //     [eventId, actor, dataHash]
+                // );
+                // const messageHash = ethers.keccak256(encoded);
                 const signature = await signer.signMessage(ethers.getBytes(messageHash));
 
                 // Submit to Contract
@@ -89,14 +89,18 @@ export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
                 return true;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } catch (err: any) {
+                console.error(err);
+
                 let message = 'Blockchain submission failed. Please try again.';
                 
                 if (err.code === 'ACTION_REJECTED' || err.code === 4001) {
                     message = 'Transaction was rejected by the wallet.';
-                } else if (err.reason && err.reason.includes('Unauthorized executor')) {
-                    message = 'The connected wallet is not registered as a trace-event executor.';
+                } else if (err.reason && err.reason.includes('Unauthorized actor')) {
+                    message = 'The connected wallet is not registered as a trace-event actor.';
                 } else if (err.reason && err.reason.includes('Trace event already exists')) {
                     message = 'This trace event has already been registered on the blockchain.';
+                } else if (err.reason && err.reason.includes('Invalid signature')) {
+                    message = 'Invalid signature';
                 } else if (err.message) {
                     message = err.message.length < 100 ? err.message : message;
                 }

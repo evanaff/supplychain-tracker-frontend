@@ -18,7 +18,7 @@ export interface TraceEvent {
     timestamp: string;
 
     txHash: string | null;
-    isRecorded: boolean;
+    isSubmitted: boolean;
 }
 
 export interface CreateHarvestingPayload {
@@ -53,7 +53,7 @@ export interface EventValidationResult {
     validation: boolean;
 }
 
-export interface TraceHistory {
+export interface ProductHistory {
     traceProduct: TraceProduct;
     traceEvents: TraceEvent[];
 }

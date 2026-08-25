@@ -6,6 +6,13 @@ import { ArrowLeft, Copy, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { EventTimeline } from '@/components/shared/EventTimeline';
@@ -15,7 +22,7 @@ import { RoleGuard } from '@/components/shared/RoleGuard';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { traceProductsApi } from '@/api/trace-products.api';
 import { traceEventsApi } from '@/api/trace-events.api';
-import { AsyncLocationCombobox } from '@/components/shared/AsyncLocationCombobox';
+import { LocationCombobox } from '@/components/shared/LocationCombobox';
 import { formatDateTime } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import config from '@/config';
@@ -32,6 +39,7 @@ export default function TraceProductDetailPage() {
 
     const [destinationGln, setDestinationGln] = useState('');
     const [actionError, setActionError] = useState<string | null>(null);
+    const [selectedPendingEventId, setSelectedPendingEventId] = useState<string>('');
 
     const { data: tp, isLoading, isError, error } = useQuery({
         queryKey: ['trace-product', id],
@@ -91,8 +99,12 @@ export default function TraceProductDetailPage() {
 
     const canShip = canShipAsGrower || canShipAsDistributor;
 
-    const pendingEvent = history?.traceEvents.find((e) => !e.isRecorded);
-
+    const pendingEvents = history?.traceEvents.filter((e) => !e.isSubmitted) ?? [];
+    const activePendingEventId =
+        pendingEvents.length === 1
+        ? pendingEvents[0].id
+        : selectedPendingEventId;
+    
     const handleDownloadQR = () => {
         const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement;
         if (canvas) {
@@ -203,7 +215,7 @@ export default function TraceProductDetailPage() {
                                         )}
                                         <div className="grid gap-4 sm:grid-cols-2 text-sm flex-1">
                                             <div>
-                                                <p className="text-muted-foreground mb-1">Name / Variety</p>
+                                                <p className="text-muted-foreground mb-1">Variety Name</p>
                                                 <p className="font-semibold">{tp?.product?.varietyName ?? '-'}</p>
                                             </div>
                                             <div>
@@ -231,15 +243,15 @@ export default function TraceProductDetailPage() {
                                             <p className="font-semibold font-mono">{tp?.lotNumber}</p>
                                         </div>
                                         <div>
-                                            <p className="text-muted-foreground mb-1">Status</p>
+                                            <p className="text-muted-foreground mb-1">Current Status</p>
                                             {tp && <StatusBadge activity={tp.currentActivity} />}
                                         </div>
                                         <div>
-                                            <p className="text-muted-foreground mb-1">Creation Date</p>
+                                            <p className="text-muted-foreground mb-1">Created At</p>
                                             <p className="font-semibold">{tp ? formatDateTime(tp.createdAt) : '-'}</p>
                                         </div>
                                         <div>
-                                            <p className="text-muted-foreground mb-1">Owner</p>
+                                            <p className="text-muted-foreground mb-1">Current Owner</p>
                                             <p className="font-semibold flex items-center gap-2">
                                                 {tp?.owner?.name ?? '-'}
                                                 {tp?.owner?.role && (
@@ -250,7 +262,7 @@ export default function TraceProductDetailPage() {
                                             </p>
                                         </div>
                                         <div>
-                                            <p className="text-muted-foreground mb-1">Location</p>
+                                            <p className="text-muted-foreground mb-1">Current Location</p>
                                             <p className="font-semibold">{tp?.owner?.location?.name ?? '-'}</p>
                                             <p className="text-xs text-muted-foreground">
                                                 {tp?.owner?.location?.city ? `${tp.owner?.location.city}, ` : ''}
@@ -269,7 +281,7 @@ export default function TraceProductDetailPage() {
 
                             {/* Action panel */}
                             <RoleGuard allowedRoles={['GROWER', 'DISTRIBUTOR', 'RETAILER']}>
-                                <Card>
+                                <Card className="overflow-visible">
                                     <CardHeader className="pb-3">
                                         <CardTitle className="text-lg">Record Next Event</CardTitle>
                                     </CardHeader>
@@ -290,7 +302,7 @@ export default function TraceProductDetailPage() {
                                             <div className="space-y-3">
                                                 <div className="space-y-1">
                                                     <Label htmlFor="destination-select">Destination Location</Label>
-                                                    <AsyncLocationCombobox
+                                                    <LocationCombobox
                                                         id="destination-select"
                                                         value={destinationGln}
                                                         onChange={(val) => setDestinationGln(val)}
@@ -331,31 +343,48 @@ export default function TraceProductDetailPage() {
 
                                         {!canHarvest && !canShip && !canReceiveAsDistributor && !canReceiveAsRetailer && !canSell && (
                                             <p className="text-sm text-muted-foreground">
-                                                No actions available for your role at the current status ({currentActivity}).
+                                                No actions available for your role at the current status.
                                             </p>
                                         )}
 
                                         {actionError && <p className="text-sm text-destructive">{actionError}</p>}
 
-                                        {/* Blockchain submit for pending events */}
-                                        {pendingEvent && (
-                                            <>
-                                                <Separator />
-                                                <div className="space-y-2">
-                                                    <p className="text-sm font-medium">Submit to Blockchain</p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        Event <span className="font-mono">{pendingEvent.id}</span> has been recorded
-                                                        but not yet submitted to the blockchain.
-                                                    </p>
-                                                    <BlockchainSubmitButton
-                                                        eventId={pendingEvent.id}
-                                                        invalidateKeys={[
-                                                            ['trace-product', id!],
-                                                            ['trace-history', id!],
-                                                        ]}
-                                                    />
-                                                </div>
-                                            </>
+                                        {pendingEvents.length > 0 && (
+                                        <>
+                                            <Separator />
+                                            <div className="space-y-4">
+                                            <div>
+                                                <p className="text-sm font-medium">Submit to Blockchain</p>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                <Select
+                                                value={activePendingEventId}
+                                                onValueChange={(val) => setSelectedPendingEventId(val ?? '')}
+                                                >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select trace event ID" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {pendingEvents.map((event) => (
+                                                    <SelectItem key={event.id} value={event.id}>
+                                                        {event.id}
+                                                    </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                                </Select>
+
+                                                <BlockchainSubmitButton
+                                                eventId={activePendingEventId}
+                                                disabled={!activePendingEventId}
+                                                invalidateKeys={[
+                                                    ['trace-product', id!],
+                                                    ['trace-history', id!],
+                                                ]}
+                                                />
+                                            </div>
+                                            </div>
+                                        </>
                                         )}
                                     </CardContent>
                                 </Card>

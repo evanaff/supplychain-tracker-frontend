@@ -1,7 +1,7 @@
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, Sprout, Truck, ShoppingBag } from 'lucide-react';
+import { MapPin, Sprout, Truck, Store, Route, Apple } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
@@ -24,7 +24,7 @@ function StatCard({
         <Card className="hover:shadow-md transition-shadow border border-border/50">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-                <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${color}`}>
+                <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${color}`}>
                     {icon}
                 </div>
             </CardHeader>
@@ -43,8 +43,8 @@ function AdminDashboard() {
 
     if (isLoading) {
         return (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {Array.from({ length: 4 }).map((_, i) => (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
                     <Card key={i}>
                         <CardHeader className="pb-2">
                             <Skeleton className="h-4 w-24" />
@@ -65,30 +65,42 @@ function AdminDashboard() {
     const stats = data as DashboardStats;
 
     return (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <StatCard
-                title="Growers"
+                title="Total Growers"
                 value={stats.totalGrowers}
-                icon={<Sprout className="h-4 w-4 text-emerald-700" />}
+                icon={<Sprout className="h-9 w-9 text-emerald-700" />}
                 color="bg-emerald-50"
             />
             <StatCard
-                title="Distributors"
+                title="Total Distributors"
                 value={stats.totalDistributors}
-                icon={<Truck className="h-4 w-4 text-blue-700" />}
+                icon={<Truck className="h-9 w-9 text-blue-700" />}
                 color="bg-blue-50"
             />
             <StatCard
-                title="Retailers"
+                title="Total Retailers"
                 value={stats.totalRetailers}
-                icon={<ShoppingBag className="h-4 w-4 text-violet-700" />}
+                icon={<Store className="h-9 w-9 text-violet-700" />}
                 color="bg-violet-50"
             />
             <StatCard
-                title="Locations"
+                title="Total Locations"
                 value={stats.totalLocations}
-                icon={<MapPin className="h-4 w-4 text-amber-700" />}
+                icon={<MapPin className="h-9 w-9 text-amber-700" />}
                 color="bg-amber-50"
+            />
+            <StatCard
+                title="Total Products"
+                value={stats.totalProducts}
+                icon={<Apple className="h-9 w-9 text-rose-700" />}
+                color="bg-rose-50"
+            />
+            <StatCard
+                title="Total Trace Products"
+                value={stats.totalTraceProducts}
+                icon={<Route className="h-9 w-9 text-cyan-700" />}
+                color="bg-cyan-50"
             />
         </div>
     );
