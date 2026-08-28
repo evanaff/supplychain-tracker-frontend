@@ -25,11 +25,9 @@ export const traceProductsApi = {
             payload,
         ),
 
-    // Public - no auth required
     getHistory: (id: string) =>
         apiClient.get<ApiResponse<ProductHistory>>(`/api/trace-products/${id}/history`),
 
-    // Public - no auth required
     verify: (id: string) =>
         apiClient.post<ApiResponse<TraceVerificationResult>>(
             `/api/trace-products/${id}/verify`,

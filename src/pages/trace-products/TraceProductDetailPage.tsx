@@ -24,7 +24,6 @@ import { traceProductsApi } from '@/api/trace-products.api';
 import { traceEventsApi } from '@/api/trace-events.api';
 import { LocationCombobox } from '@/components/shared/LocationCombobox';
 import { formatDateTime } from '@/lib/utils';
-import { useAuth } from '@/hooks/useAuth';
 import config from '@/config';
 import type { SupplyChainActivity } from '@/types';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -35,11 +34,12 @@ export default function TraceProductDetailPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const { isGrower, isDistributor, isRetailer } = useAuth();
 
     const [destinationGln, setDestinationGln] = useState('');
     const [actionError, setActionError] = useState<string | null>(null);
     const [selectedPendingEventId, setSelectedPendingEventId] = useState<string>('');
+
+    const [selectedActivity, setSelectedActivity] = useState<SupplyChainActivity | ''>('');
 
     const { data: tp, isLoading, isError, error } = useQuery({
         queryKey: ['trace-product', id],
@@ -54,29 +54,26 @@ export default function TraceProductDetailPage() {
     });
 
     const createEventMutation = useMutation({
-        mutationFn: async (eventType: SupplyChainActivity) => {
-            switch (eventType) {
-                case 'HARVESTING':
-                    return traceEventsApi.createHarvesting({ traceProductId: id! });
-                case 'SHIPPING':
-                    return traceEventsApi.createShipping({ traceProductId: id!, destinationLocationGln: destinationGln });
-                case 'RECEIVING':
-                    return traceEventsApi.createReceiving({ traceProductId: id! });
-                case 'SELLING':
-                    return traceEventsApi.createSelling({ traceProductId: id! });
-            }
+        mutationFn: async (payload: { activity: SupplyChainActivity; destinationGln?: string }) => {
+            return traceEventsApi.create({
+                traceProductId: id!,
+                supplyChainActivity: payload.activity,
+                destinationLocationGln: payload.destinationGln,
+            });
         },
         onSuccess: () => {
             void queryClient.invalidateQueries({ queryKey: ['trace-product', id] });
             void queryClient.invalidateQueries({ queryKey: ['trace-history', id] });
             setActionError(null);
+            // setIsDialogOpen(false);
+            setSelectedActivity('');
+            setDestinationGln('');
         },
         onError: (err: Error) => {
             setActionError(err.message ?? 'Failed to create event.');
         },
     });
 
-    const currentActivity = tp?.currentActivity;
     const publicTraceUrl = `${window.location.origin}/trace-history/${id}`;
 
     if (isError) {
@@ -90,15 +87,6 @@ export default function TraceProductDetailPage() {
         );
     }
 
-    const canHarvest = isGrower && currentActivity === 'CREATED';
-    const canShipAsGrower = isGrower && currentActivity === 'HARVESTING';
-    const canReceiveAsDistributor = isDistributor && currentActivity === 'SHIPPING';
-    const canShipAsDistributor = isDistributor && currentActivity === 'RECEIVING';
-    const canReceiveAsRetailer = isRetailer && currentActivity === 'SHIPPING';
-    const canSell = isRetailer && currentActivity === 'RECEIVING';
-
-    const canShip = canShipAsGrower || canShipAsDistributor;
-
     const pendingEvents = history?.traceEvents.filter((e) => !e.isSubmitted) ?? [];
     const activePendingEventId =
         pendingEvents.length === 1
@@ -108,7 +96,7 @@ export default function TraceProductDetailPage() {
     const handleDownloadQR = () => {
         const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement;
         if (canvas) {
-            const padding = 24; // 24px white padding
+            const padding = 24;
             const newCanvas = document.createElement('canvas');
             newCanvas.width = canvas.width + padding * 2;
             newCanvas.height = canvas.height + padding * 2;
@@ -286,21 +274,27 @@ export default function TraceProductDetailPage() {
                                         <CardTitle className="text-lg">Record Next Event</CardTitle>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
-                                        {canHarvest && (
+                                        <div className="space-y-4">
                                             <div className="space-y-2">
-                                                <p className="text-sm text-muted-foreground">Record that this lot has been harvested.</p>
-                                                <Button
-                                                    onClick={() => createEventMutation.mutate('HARVESTING')}
-                                                    disabled={createEventMutation.isPending}
+                                                <Label htmlFor="activity-select">Supply Chain Activity</Label>
+                                                <Select
+                                                    value={selectedActivity}
+                                                    onValueChange={(val) => setSelectedActivity(val as SupplyChainActivity)}
                                                 >
-                                                    {createEventMutation.isPending ? 'Recording…' : 'Record Harvesting'}
-                                                </Button>
+                                                    <SelectTrigger id="activity-select">
+                                                        <SelectValue placeholder="Select activity..." />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="HARVESTING">Harvesting</SelectItem>
+                                                        <SelectItem value="SHIPPING">Shipping</SelectItem>
+                                                        <SelectItem value="RECEIVING">Receiving</SelectItem>
+                                                        <SelectItem value="SELLING">Selling</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
-                                        )}
 
-                                        {canShip && (
-                                            <div className="space-y-3">
-                                                <div className="space-y-1">
+                                            {selectedActivity === 'SHIPPING' && (
+                                                <div className="space-y-2">
                                                     <Label htmlFor="destination-select">Destination Location</Label>
                                                     <LocationCombobox
                                                         id="destination-select"
@@ -308,46 +302,22 @@ export default function TraceProductDetailPage() {
                                                         onChange={(val) => setDestinationGln(val)}
                                                     />
                                                 </div>
-                                                <Button
-                                                    onClick={() => createEventMutation.mutate('SHIPPING')}
-                                                    disabled={createEventMutation.isPending || !destinationGln}
-                                                >
-                                                    {createEventMutation.isPending ? 'Recording…' : 'Record Shipping'}
-                                                </Button>
-                                            </div>
-                                        )}
+                                            )}
 
-                                        {(canReceiveAsDistributor || canReceiveAsRetailer) && (
-                                            <div className="space-y-2">
-                                                <p className="text-sm text-muted-foreground">Confirm receipt of this shipment at your location.</p>
-                                                <Button
-                                                    onClick={() => createEventMutation.mutate('RECEIVING')}
-                                                    disabled={createEventMutation.isPending}
-                                                >
-                                                    {createEventMutation.isPending ? 'Recording…' : 'Record Receiving'}
-                                                </Button>
-                                            </div>
-                                        )}
+                                            {actionError && <p className="text-sm text-destructive">{actionError}</p>}
 
-                                        {canSell && (
-                                            <div className="space-y-2">
-                                                <p className="text-sm text-muted-foreground">Mark this lot as sold to end consumers.</p>
-                                                <Button
-                                                    onClick={() => createEventMutation.mutate('SELLING')}
-                                                    disabled={createEventMutation.isPending}
-                                                >
-                                                    {createEventMutation.isPending ? 'Recording…' : 'Record Selling'}
-                                                </Button>
-                                            </div>
-                                        )}
-
-                                        {!canHarvest && !canShip && !canReceiveAsDistributor && !canReceiveAsRetailer && !canSell && (
-                                            <p className="text-sm text-muted-foreground">
-                                                No actions available for your role at the current status.
-                                            </p>
-                                        )}
-
-                                        {actionError && <p className="text-sm text-destructive">{actionError}</p>}
+                                            <Button
+                                                className="w-full"
+                                                onClick={() => createEventMutation.mutate({ activity: selectedActivity as SupplyChainActivity, destinationGln })}
+                                                disabled={
+                                                !selectedActivity ||
+                                                createEventMutation.isPending ||
+                                                (selectedActivity === 'SHIPPING' && !destinationGln)
+                                                }
+                                            >
+                                                {createEventMutation.isPending ? 'Recording…' : 'Record Trace Event'}
+                                            </Button>
+                                        </div>
 
                                         {pendingEvents.length > 0 && (
                                         <>

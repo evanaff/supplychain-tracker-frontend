@@ -21,21 +21,10 @@ export interface TraceEvent {
     isSubmitted: boolean;
 }
 
-export interface CreateHarvestingPayload {
-    traceProductId: string;
-}
-
-export interface CreateShippingPayload {
-    traceProductId: string;
-    destinationLocationGln: string;
-}
-
-export interface CreateReceivingPayload {
-    traceProductId: string;
-}
-
-export interface CreateSellingPayload {
-    traceProductId: string;
+export interface CreateTraceEventDTO {
+  traceProductId: string;
+  supplyChainActivity: SupplyChainActivity;
+  destinationLocationGln?: string;
 }
 
 export interface SubmitEventPayload {
