@@ -99,6 +99,10 @@ export default function TraceProductsPage() {
         },
     });
 
+    const onSubmit = (values: CreateTraceProductFormValues) => {
+        createMutation.mutate(values);
+    };
+
     return (
         <>
             <div className="space-y-6">
@@ -227,7 +231,7 @@ export default function TraceProductsPage() {
                         <DialogHeader>
                             <DialogTitle>Create Product Lot</DialogTitle>
                         </DialogHeader>
-                        <form onSubmit={(e) => void handleSubmit((v) => createMutation.mutate(v))(e)} className="space-y-4">
+                        <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} className="space-y-4">
                             <div className="space-y-1">
                                 <Label htmlFor="gtin-select">Product</Label>
                                 <Controller
