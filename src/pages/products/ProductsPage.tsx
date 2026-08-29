@@ -95,8 +95,8 @@ export default function ProductsPage() {
             <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Products</h1>
-                        <p className="text-muted-foreground text-sm">Traceable product catalog.</p>
+                        <h1 className="text-2xl font-bold tracking-tight">Product List</h1>
+                        <p className="text-muted-foreground text-sm">Traceable product list</p>
                     </div>
                     {isAdmin && (
                         <Button onClick={() => navigate('/products/new')} className="shrink-0">

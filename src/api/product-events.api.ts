@@ -1,25 +1,25 @@
 import { apiClient } from './client';
 import type { ApiResponse } from '@/types/api.types';
 import type {
-    CreateTraceEventDTO,
-    TraceEvent,
-} from '@/types/trace-event.types';
+    CreateProductEventDTO,
+    ProductEvent,
+} from '@/types/product-event.types';
 
-export const traceEventsApi = {
+export const productEventsApi = {
     getEventHash: (id: string) =>
         apiClient.get<ApiResponse<{ dataHash: string, messageHash: string }>>(
-            `/api/trace-events/${id}/hash`,
+            `/api/product-events/${id}/hash`,
         ),
 
     saveTxHash: (id: string, txHash: string) =>
         apiClient.post<ApiResponse<void>>(
-            `/api/trace-events/${id}/save-txhash`,
+            `/api/product-events/${id}/save-txhash`,
             { txHash },
         ),
 
-    create: (payload: CreateTraceEventDTO) =>
-        apiClient.post<ApiResponse<{ traceEvent: TraceEvent }>>(
-        '/api/trace-events',
+    create: (payload: CreateProductEventDTO) =>
+        apiClient.post<ApiResponse<{ productEvent: ProductEvent }>>(
+        '/api/product-events',
       payload,
     ),
 };

@@ -67,7 +67,7 @@ export default function ActorsPage() {
     });
 
     if (!isAdmin) {
-        return <Navigate to="/trace-products" replace />;
+        return <Navigate to="/product-lots" replace />;
     }
 
     return (
@@ -76,9 +76,9 @@ export default function ActorsPage() {
             <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Actors</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">Actor List</h1>
                         <p className="text-muted-foreground text-sm">
-                            Registered supply chain participants.
+                            Registered supply chain actor list
                         </p>
                     </div>
                     <Button id="create-actor-button" onClick={() => navigate('/actors/new')} className="gap-2">

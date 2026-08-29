@@ -5,6 +5,7 @@ import type { Product, ProductFilters } from '@/types/product.types';
 export const productsApi = {
     list: (params?: ProductFilters) =>
         apiClient.get<PaginatedResponse<{ products: Product[] }>>('/api/products', { params }),
+    
     create: (data: FormData) =>
         apiClient.post<{ status: string; data: { product: Product } }>('/api/products', data, {
             headers: {

@@ -54,7 +54,7 @@ export default function CreateLocationPage() {
     };
 
     if (!isAdmin) {
-        return <Navigate to="/trace-products" replace />;
+        return <Navigate to="/product-lots" replace />;
     }
 
     return (
@@ -68,7 +68,7 @@ export default function CreateLocationPage() {
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Add Location</h1>
                         <p className="text-sm text-muted-foreground mt-1">
-                            Register a new location.
+                            Register a new location
                         </p>
                     </div>
                 </div>
@@ -149,7 +149,7 @@ export default function CreateLocationPage() {
                                     Cancel
                                 </Button>
                                 <Button type="submit" disabled={isSubmitting || createMutation.isPending}>
-                                    {createMutation.isPending ? 'Creating…' : 'Create Location'}
+                                    {createMutation.isPending ? 'Creating…' : 'Create'}
                                 </Button>
                             </div>
                         </form>

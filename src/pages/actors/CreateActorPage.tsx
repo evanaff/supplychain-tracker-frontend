@@ -56,7 +56,7 @@ export default function CreateActorPage() {
     };
 
     if (!isAdmin) {
-        return <Navigate to="/trace-products" replace />;
+        return <Navigate to="/product-lots" replace />;
     }
 
     return (
@@ -70,7 +70,7 @@ export default function CreateActorPage() {
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Add Actor</h1>
                         <p className="text-sm text-muted-foreground mt-1">
-                            Register a new supply chain participant.
+                            Register a new supply chain actor
                         </p>
                     </div>
                 </div>
@@ -154,7 +154,7 @@ export default function CreateActorPage() {
                                     Cancel
                                 </Button>
                                 <Button type="submit" disabled={isSubmitting || createMutation.isPending}>
-                                    {createMutation.isPending ? 'Creating…' : 'Create Actor'}
+                                    {createMutation.isPending ? 'Creating…' : 'Create'}
                                 </Button>
                             </div>
                         </form>

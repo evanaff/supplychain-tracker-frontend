@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { ethers } from 'ethers';
 import { getSigner, getChainId } from '@/lib/ethers';
-import { traceEventsApi } from '@/api/trace-events.api';
+import { productEventsApi } from '@/api/product-events.api';
 import config from '@/config';
 import { SMART_CONTRACT_ABI } from '@/config/abi';
 
@@ -38,20 +38,14 @@ export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
                 }
 
                 // Get Data Hash
-                const hashRes = await traceEventsApi.getEventHash(eventId);
+                const hashRes = await productEventsApi.getEventHash(eventId);
                 const { dataHash, messageHash } = hashRes.data.data;
 
                 const signer = await getSigner();
-                // const actor = await signer.getAddress();
 
                 // Generate Message Hash & Sign
                 setStatus('waiting-signature');
                 
-                // const encoded = ethers.AbiCoder.defaultAbiCoder().encode(
-                //     ['string', 'address', 'bytes32'],
-                //     [eventId, actor, dataHash]
-                // );
-                // const messageHash = ethers.keccak256(encoded);
                 const signature = await signer.signMessage(ethers.getBytes(messageHash));
 
                 // Submit to Contract
@@ -62,7 +56,7 @@ export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
                     signer
                 );
 
-                const tx = await supplyChainTracker.addTraceEvent(
+                const tx = await supplyChainTracker.addProductEvent(
                     eventId,
                     dataHash,
                     signature
@@ -76,7 +70,7 @@ export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
 
                 // Save Transaction Hash Off-Chain
                 setStatus('saving-tx');
-                await traceEventsApi.saveTxHash(eventId, tx.hash);
+                await productEventsApi.saveTxHash(eventId, tx.hash);
 
                 // Invalidate Relevant Caches
                 if (options.invalidateKeys) {
@@ -96,9 +90,9 @@ export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
                 if (err.code === 'ACTION_REJECTED' || err.code === 4001) {
                     message = 'Transaction was rejected by the wallet.';
                 } else if (err.reason && err.reason.includes('Unauthorized actor')) {
-                    message = 'The connected wallet is not registered as a trace-event actor.';
-                } else if (err.reason && err.reason.includes('Trace event already exists')) {
-                    message = 'This trace event has already been registered on the blockchain.';
+                    message = 'The connected wallet is not registered as a product-event actor.';
+                } else if (err.reason && err.reason.includes('Product event already exists')) {
+                    message = 'This product event has already been registered on the blockchain.';
                 } else if (err.reason && err.reason.includes('Invalid signature')) {
                     message = 'Invalid signature';
                 } else if (err.message) {

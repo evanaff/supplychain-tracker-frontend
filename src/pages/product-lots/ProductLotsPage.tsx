@@ -36,19 +36,18 @@ import { Pagination } from '@/components/shared/Pagination';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { ErrorStateWithRetry } from '@/components/shared/ErrorState';
 import { RoleGuard } from '@/components/shared/RoleGuard';
-import { traceProductsApi } from '@/api/trace-products.api';
-import { formatDateTime } from '@/lib/utils';
+import { productLotsApi } from '@/api/product-lots.api';
 import { usePagination } from '@/hooks/usePagination';
 import { useAuth } from '@/hooks/useAuth';
 import {
-    createTraceProductSchema,
-    type CreateTraceProductFormValues,
-} from './schemas/traceProduct.schema';
+    CreateProductLotSchema,
+    type CreateProductLotFormValues,
+} from './schemas/productLot.schema';
 import config from '@/config';
 import type { SupplyChainActivity } from '@/types/index';
 import { ProductCombobox } from '@/components/shared/ProductCombobox';
 
-const traceEventSequence = [
+const productEventSequence = [
     'CREATED',
     'HARVESTING',
     'SHIPPING',
@@ -58,11 +57,11 @@ const traceEventSequence = [
 
 const FILTER_OPTIONS: Array<{ value: SupplyChainActivity | ''; label: string }> = [
     { value: '', label: 'All statuses' },
-    ...traceEventSequence.map((a) => ({ value: a as SupplyChainActivity, label: a })),
+    ...productEventSequence.map((a) => ({ value: a as SupplyChainActivity, label: a })),
 ];
 
-export default function TraceProductsPage() {
-    useDocumentTitle(`Trace Products - ${config.app.name}`);
+export default function ProductLotsPage() {
+    useDocumentTitle(`Product Lots - ${config.app.name}`);
 
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -73,9 +72,9 @@ export default function TraceProductsPage() {
     const { isGrower } = useAuth();
 
     const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
-        queryKey: ['trace-products', page, limit, search, statusFilter],
+        queryKey: ['product-lots', page, limit, search, statusFilter],
         queryFn: () =>
-            traceProductsApi
+            productLotsApi
                 .list({ page, limit, search: search || undefined, filter: statusFilter || undefined })
                 .then((r) => r.data.data),
     });
@@ -86,20 +85,20 @@ export default function TraceProductsPage() {
         control,
         reset,
         formState: { errors, isSubmitting },
-    } = useForm<CreateTraceProductFormValues>({
-        resolver: zodResolver(createTraceProductSchema),
+    } = useForm<CreateProductLotFormValues>({
+        resolver: zodResolver(CreateProductLotSchema),
     });
 
     const createMutation = useMutation({
-        mutationFn: (values: CreateTraceProductFormValues) => traceProductsApi.create(values),
+        mutationFn: (values: CreateProductLotFormValues) => productLotsApi.create(values),
         onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: ['trace-products'] });
+            void queryClient.invalidateQueries({ queryKey: ['product-lots'] });
             setDialogOpen(false);
             reset();
         },
     });
 
-    const onSubmit = (values: CreateTraceProductFormValues) => {
+    const onSubmit = (values: CreateProductLotFormValues) => {
         createMutation.mutate(values);
     };
 
@@ -108,9 +107,9 @@ export default function TraceProductsPage() {
             <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Trace Products</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">Product Lots</h1>
                         <p className="text-muted-foreground text-sm">
-                            Product lots being tracked through the supply chain.
+                            Product lots being tracked through the supply chain
                         </p>
                     </div>
                     <RoleGuard allowedRoles={['GROWER']}>
@@ -147,7 +146,7 @@ export default function TraceProductsPage() {
                         </SelectContent>
                     </Select>
                     <Button
-                        id="refresh-trace-products"
+                        id="refresh-product-lots"
                         variant="outline"
                         size="icon"
                         onClick={() => void refetch()}
@@ -165,11 +164,11 @@ export default function TraceProductsPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead>ID</TableHead>
                                     <TableHead>Lot Number</TableHead>
                                     <TableHead>Product</TableHead>
                                     <TableHead>Quantity</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Created</TableHead>
+                                    <TableHead>Last Event</TableHead>
                                     <TableHead className="w-16" />
                                 </TableRow>
                             </TableHeader>
@@ -185,27 +184,27 @@ export default function TraceProductsPage() {
                                                 <TableCell />
                                             </TableRow>
                                         ))
-                                    : data?.traceProducts.map((tp) => (
+                                    : data?.productLots.map((pl) => (
                                             <TableRow
-                                                key={tp.id}
+                                                key={pl.id}
                                                 className="cursor-pointer hover:bg-muted/50"
-                                                onClick={() => navigate(`/trace-products/${tp.id}`)}
+                                                onClick={() => navigate(`/product-lots/${pl.id}`)}
                                             >
                                                 <TableCell className="font-mono text-sm font-medium">
-                                                    {tp.lotNumber}
+                                                    {pl.id}
+                                                </TableCell>
+                                                <TableCell className="font-mono text-sm font-medium">
+                                                    {pl.lotNumber}
                                                 </TableCell>
                                                 <TableCell className="text-sm">
-                                                    {tp.product?.varietyName ?? tp.product.gtin}
+                                                    {pl.product?.varietyName ?? pl.product.gtin}
                                                 </TableCell>
                                                 <TableCell>
-                                                    {tp.quantity.toLocaleString()}
-                                                    {tp.product?.unitOfMeasure ? ` ${tp.product.unitOfMeasure}` : ''}
+                                                    {pl.quantity.toLocaleString()}
+                                                    {pl.product?.unitOfMeasure ? ` ${pl.product.unitOfMeasure}` : ''}
                                                 </TableCell>
                                                 <TableCell>
-                                                    <StatusBadge activity={tp.currentActivity} />
-                                                </TableCell>
-                                                <TableCell className="text-muted-foreground text-sm">
-                                                    {formatDateTime(tp.createdAt)}
+                                                    <StatusBadge activity={pl.currentActivity} />
                                                 </TableCell>
                                                 <TableCell>
                                                     <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
@@ -224,7 +223,7 @@ export default function TraceProductsPage() {
                 />
             </div>
 
-            {/* Create Trace Product Dialog */}
+            {/* Create Product Lot Dialog */}
             {isGrower && (
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                     <DialogContent className="sm:max-w-sm">

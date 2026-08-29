@@ -15,21 +15,21 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { EventTimeline } from '@/components/shared/EventTimeline';
+import { ProductEventTimeline } from '@/components/shared/ProductEventTimeline';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { BlockchainSubmitButton } from '@/components/shared/BlockchainSubmitButton';
 import { RoleGuard } from '@/components/shared/RoleGuard';
 import { ErrorState } from '@/components/shared/ErrorState';
-import { traceProductsApi } from '@/api/trace-products.api';
-import { traceEventsApi } from '@/api/trace-events.api';
+import { productLotsApi } from '@/api/product-lots.api';
+import { productEventsApi } from '@/api/product-events.api';
 import { LocationCombobox } from '@/components/shared/LocationCombobox';
 import { formatDateTime } from '@/lib/utils';
 import config from '@/config';
 import type { SupplyChainActivity } from '@/types';
 import { QRCodeCanvas } from 'qrcode.react';
 
-export default function TraceProductDetailPage() {
-    useDocumentTitle(`Trace Product Detail - ${config.app.name}`);
+export default function ProductLotDetailPage() {
+    useDocumentTitle(`Product Lot Detail - ${config.app.name}`);
 
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -41,29 +41,35 @@ export default function TraceProductDetailPage() {
 
     const [selectedActivity, setSelectedActivity] = useState<SupplyChainActivity | ''>('');
 
-    const { data: tp, isLoading, isError, error } = useQuery({
-        queryKey: ['trace-product', id],
-        queryFn: () => traceProductsApi.getById(id!).then((r) => r.data.data.traceProduct),
+    const { data: history, isLoading, isError, error } = useQuery({
+        queryKey: ['product-lot', id],
+        queryFn: () => productLotsApi.getHistory(id!).then((r) => r.data.data),
         enabled: Boolean(id),
     });
 
-    const { data: history } = useQuery({
-        queryKey: ['trace-history', id],
-        queryFn: () => traceProductsApi.getHistory(id!).then((r) => r.data.data),
-        enabled: Boolean(id),
-    });
+    // const { data: tp, isLoading, isError, error } = useQuery({
+    //     queryKey: ['product-lot', id],
+    //     queryFn: () => productLotsApi.getById(id!).then((r) => r.data.data.productLot),
+    //     enabled: Boolean(id),
+    // });
+
+    // const { data: history } = useQuery({
+    //     queryKey: ['product-history', id],
+    //     queryFn: () => productLotsApi.getHistory(id!).then((r) => r.data.data),
+    //     enabled: Boolean(id),
+    // });
 
     const createEventMutation = useMutation({
         mutationFn: async (payload: { activity: SupplyChainActivity; destinationGln?: string }) => {
-            return traceEventsApi.create({
-                traceProductId: id!,
+            return productEventsApi.create({
+                productLotId: id!,
                 supplyChainActivity: payload.activity,
                 destinationLocationGln: payload.destinationGln,
             });
         },
         onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: ['trace-product', id] });
-            void queryClient.invalidateQueries({ queryKey: ['trace-history', id] });
+            void queryClient.invalidateQueries({ queryKey: ['product-lot', id] });
+            void queryClient.invalidateQueries({ queryKey: ['product-history', id] });
             setActionError(null);
             // setIsDialogOpen(false);
             setSelectedActivity('');
@@ -74,20 +80,20 @@ export default function TraceProductDetailPage() {
         },
     });
 
-    const publicTraceUrl = `${window.location.origin}/trace-history/${id}`;
+    const productHistoryUrl = `${window.location.origin}/product-history/${id}`;
 
     if (isError) {
         return (
             <ErrorState
                 variant="not-found"
-                title="Trace product not found"
+                title="Product Lot not found"
                 description={error?.message}
-                action={<Button variant="outline" onClick={() => navigate('/trace-products')}>Back</Button>}
+                action={<Button variant="outline" onClick={() => navigate('/product-lots')}>Back</Button>}
             />
         );
     }
 
-    const pendingEvents = history?.traceEvents.filter((e) => !e.isSubmitted) ?? [];
+    const pendingEvents = history?.productEvents.filter((e) => !e.isSubmitted) ?? [];
     const activePendingEventId =
         pendingEvents.length === 1
         ? pendingEvents[0].id
@@ -111,7 +117,7 @@ export default function TraceProductDetailPage() {
             const pngUrl = newCanvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
             const downloadLink = document.createElement('a');
             downloadLink.href = pngUrl;
-            downloadLink.download = `trace-product-${tp?.lotNumber ?? id}.png`;
+            downloadLink.download = `product-lot-${history?.productLot.lotNumber ?? id}.png`;
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
@@ -124,14 +130,14 @@ export default function TraceProductDetailPage() {
             <div className="space-y-6 max-w-5xl mx-auto pb-10">
                 {/* Header */}
                 <div className="flex items-center gap-3">
-                    <Button variant="ghost" size="icon" onClick={() => navigate('/trace-products')}>
+                    <Button variant="ghost" size="icon" onClick={() => navigate('/product-lots')}>
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                     <div className="flex-1">
                         {isLoading ? (
                             <Skeleton className="h-7 w-48" />
                         ) : (
-                            <h1 className="text-2xl font-bold tracking-tight font-mono">{tp?.lotNumber ?? 'Trace Detail'}</h1>
+                            <h1 className="text-2xl font-bold tracking-tight font-mono">{history?.productLot.lotNumber ?? 'Product Lot Detail'}</h1>
                         )}
                     </div>
                 </div>
@@ -147,26 +153,26 @@ export default function TraceProductDetailPage() {
                             {/* Section 1: QR Code */}
                             <Card>
                                 <CardHeader className="pb-3">
-                                    <CardTitle className="text-lg">Public Trace QR Code</CardTitle>
+                                    <CardTitle className="text-lg">Product History QR Code</CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex flex-col items-center justify-center space-y-4 pt-4">
                                     <div className="bg-white p-4 rounded-xl shadow-sm border inline-block">
                                         <QRCodeCanvas
                                             id="qr-canvas"
-                                            value={publicTraceUrl}
+                                            value={productHistoryUrl}
                                             size={200}
                                             level="H"
                                             className="mx-auto rounded-md"
                                         />
                                     </div>
                                     <div className="flex flex-col sm:flex-row items-center gap-2 w-full max-w-md mx-auto">
-                                        <code className="text-xs w-full sm:flex-1 truncate p-2.5 bg-muted rounded-md border text-center sm:text-left">{publicTraceUrl}</code>
+                                        <code className="text-xs w-full sm:flex-1 truncate p-2.5 bg-muted rounded-md border text-center sm:text-left">{productHistoryUrl}</code>
                                         <div className="flex gap-2 w-full sm:w-auto">
                                             <Button
                                                 variant="secondary"
                                                 size="sm"
                                                 className="flex-1 sm:flex-none gap-1"
-                                                onClick={() => void navigator.clipboard.writeText(publicTraceUrl)}
+                                                onClick={() => void navigator.clipboard.writeText(productHistoryUrl)}
                                             >
                                                 <Copy className="h-3 w-3" />
                                                 Copy Link
@@ -192,11 +198,11 @@ export default function TraceProductDetailPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="flex flex-col sm:flex-row gap-6">
-                                        {tp?.product?.imageUrl && (
+                                        {history?.productLot.product?.imageUrl && (
                                             <div className="shrink-0">
                                                 <img
-                                                    src={tp.product.imageUrl}
-                                                    alt={tp.product.varietyName}
+                                                    src={history.productLot.product.imageUrl}
+                                                    alt={history.productLot.product.varietyName}
                                                     className="h-24 w-24 object-cover rounded-md border"
                                                 />
                                             </div>
@@ -204,63 +210,55 @@ export default function TraceProductDetailPage() {
                                         <div className="grid gap-4 sm:grid-cols-2 text-sm flex-1">
                                             <div>
                                                 <p className="text-muted-foreground mb-1">Variety Name</p>
-                                                <p className="font-semibold">{tp?.product?.varietyName ?? '-'}</p>
+                                                <p className="font-semibold">{history?.productLot.product?.varietyName ?? '-'}</p>
                                             </div>
                                             <div>
                                                 <p className="text-muted-foreground mb-1">GTIN</p>
-                                                <p className="font-semibold font-mono">{tp?.product?.gtin ?? '-'}</p>
+                                                <p className="font-semibold font-mono">{history?.productLot.product?.gtin ?? '-'}</p>
                                             </div>
                                             <div>
                                                 <p className="text-muted-foreground mb-1">Unit of Measure</p>
-                                                <p className="font-semibold">{tp?.product?.unitOfMeasure ?? '-'}</p>
+                                                <p className="font-semibold">{history?.productLot.product?.unitOfMeasure ?? '-'}</p>
                                             </div>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            {/* Section 3: Trace Product Information */}
+                            {/* Section 3: Product Lot Information */}
                             <Card>
                                 <CardHeader className="pb-3">
-                                    <CardTitle className="text-lg">Trace Product Information</CardTitle>
+                                    <CardTitle className="text-lg">Product Lot Information</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="grid gap-4 sm:grid-cols-2 text-sm">
                                         <div>
                                             <p className="text-muted-foreground mb-1">Lot Number</p>
-                                            <p className="font-semibold font-mono">{tp?.lotNumber}</p>
+                                            <p className="font-semibold font-mono">{history?.productLot.lotNumber}</p>
                                         </div>
                                         <div>
-                                            <p className="text-muted-foreground mb-1">Current Status</p>
-                                            {tp && <StatusBadge activity={tp.currentActivity} />}
+                                            <p className="text-muted-foreground mb-1">Last Event</p>
+                                            {history && <StatusBadge activity={history.productLot.currentActivity} />}
                                         </div>
                                         <div>
                                             <p className="text-muted-foreground mb-1">Created At</p>
-                                            <p className="font-semibold">{tp ? formatDateTime(tp.createdAt) : '-'}</p>
+                                            <p className="font-semibold">{history ? formatDateTime(history.productLot.createdAt) : '-'}</p>
                                         </div>
                                         <div>
                                             <p className="text-muted-foreground mb-1">Current Owner</p>
                                             <p className="font-semibold flex items-center gap-2">
-                                                {tp?.owner?.name ?? '-'}
-                                                {tp?.owner?.role && (
+                                                {history?.productLot.owner?.name ?? '-'}
+                                                {history?.productLot.owner?.role && (
                                                     <span className="text-xs text-muted-foreground capitalize">
-                                                        ({tp.owner.role.toLowerCase()})
+                                                        ({history.productLot.owner.role.toLowerCase()})
                                                     </span>
                                                 )}
                                             </p>
                                         </div>
                                         <div>
-                                            <p className="text-muted-foreground mb-1">Current Location</p>
-                                            <p className="font-semibold">{tp?.owner?.location?.name ?? '-'}</p>
-                                            <p className="text-xs text-muted-foreground">
-                                                {tp?.owner?.location?.city ? `${tp.owner?.location.city}, ` : ''}
-                                                {tp?.owner?.location?.province ?? ''}
-                                            </p>
-                                        </div>
-                                        <div>
                                             <p className="text-muted-foreground mb-1">Quantity</p>
                                             <p className="font-semibold">
-                                                {tp?.quantity.toLocaleString()} {tp?.product?.unitOfMeasure ?? 'units'}
+                                                {history?.productLot.quantity.toLocaleString()} {history?.productLot.product?.unitOfMeasure ?? 'units'}
                                             </p>
                                         </div>
                                     </div>
@@ -315,7 +313,7 @@ export default function TraceProductDetailPage() {
                                                 (selectedActivity === 'SHIPPING' && !destinationGln)
                                                 }
                                             >
-                                                {createEventMutation.isPending ? 'Recording…' : 'Record Trace Event'}
+                                                {createEventMutation.isPending ? 'Recording…' : 'Record Product Event'}
                                             </Button>
                                         </div>
 
@@ -333,7 +331,7 @@ export default function TraceProductDetailPage() {
                                                 onValueChange={(val) => setSelectedPendingEventId(val ?? '')}
                                                 >
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="Select trace event ID" />
+                                                    <SelectValue placeholder="Select product event ID" />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {pendingEvents.map((event) => (
@@ -348,8 +346,8 @@ export default function TraceProductDetailPage() {
                                                 eventId={activePendingEventId}
                                                 disabled={!activePendingEventId}
                                                 invalidateKeys={[
-                                                    ['trace-product', id!],
-                                                    ['trace-history', id!],
+                                                    ['product-lot', id!],
+                                                    ['product-history', id!],
                                                 ]}
                                                 />
                                             </div>
@@ -362,13 +360,13 @@ export default function TraceProductDetailPage() {
                         </div>
 
                         <div className="space-y-6 md:col-span-1 lg:col-span-2 sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto">
-                            {/* Section 4: Event Timeline */}
+                            {/* Section 4: Product Event Timeline */}
                             <Card>
                                 <CardHeader className="pb-3">
-                                    <CardTitle className="text-lg">Event Timeline</CardTitle>
+                                    <CardTitle className="text-lg">Product Event Timeline</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <EventTimeline events={history?.traceEvents ?? []} />
+                                    <ProductEventTimeline events={history?.productEvents ?? []} />
                                 </CardContent>
                             </Card>
                         </div>
