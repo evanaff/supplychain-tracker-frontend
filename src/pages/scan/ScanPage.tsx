@@ -45,18 +45,18 @@ export default function ScanPage() {
     const handleScan = useCallback((decodedText: string) => {
         try {
             const url = new URL(decodedText);
-            if (url.origin === window.location.origin && url.pathname.startsWith('/trace-history/')) {
-                const id = url.pathname.replace('/trace-history/', '');
+            if (url.origin === window.location.origin && url.pathname.startsWith('/product-history/')) {
+                const id = url.pathname.replace('/product-history/', '');
                 if (id) {
                     if (scannerRef.current?.isScanning) {
                         scannerRef.current.stop().catch(console.error);
                     }
-                    navigate(`/trace-products/${id}`);
+                    navigate(`/product-lots/${id}`);
                 } else {
                     setError('Invalid QR code: Missing product ID.');
                 }
             } else {
-                setError('Invalid QR code: Not a valid trace URL for this system.');
+                setError('Invalid QR code: Not a valid URL for this system.');
             }
         // eslint-disable-next-line
         } catch (e) {
@@ -131,7 +131,7 @@ export default function ScanPage() {
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Scan QR Code</h1>
                     <p className="text-muted-foreground text-sm">
-                        Scan a product's QR code to view its trace details.
+                        Scan a product's QR code to view its details
                     </p>
                 </div>
 

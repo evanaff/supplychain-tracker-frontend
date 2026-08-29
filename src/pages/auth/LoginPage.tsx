@@ -1,7 +1,7 @@
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wallet, AlertTriangle, ExternalLink, Loader2, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, ExternalLink, Loader2, LogIn, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,10 +13,10 @@ import config from '@/config';
 import type { AuthActor } from '@/types/auth.types';
 import logo from '@/assets/logo.svg';
 
-type LoginStep = 'connect' | 'sign' | 'verifying' | 'error';
+type LoginStep = 'connect' | 'sign' | 'verifying';
 
 export default function LoginPage() {
-    useDocumentTitle(`Sign In - ${config.app.name}`);
+    useDocumentTitle(`Log In - ${config.app.name}`);
 
     const navigate = useNavigate();
     const { setAuth, isAuthenticated, role } = useAuth();
@@ -31,7 +31,7 @@ export default function LoginPage() {
             if (role === 'ADMIN') {
                 redirectPath = '/dashboard';
             } else if (role && ['GROWER', 'DISTRIBUTOR', 'RETAILER'].includes(role)) {
-                redirectPath = '/trace-products';
+                redirectPath = '/product-lots';
             }
         }
         navigate(redirectPath, { replace: true });
@@ -68,7 +68,7 @@ export default function LoginPage() {
                 if (userRole === 'ADMIN') {
                     redirectPath = '/dashboard';
                 } else if (['GROWER', 'DISTRIBUTOR', 'RETAILER'].includes(userRole)) {
-                    redirectPath = '/trace-products';
+                    redirectPath = '/product-lots';
                 }
             }
             navigate(redirectPath, { replace: true });
@@ -84,15 +84,14 @@ export default function LoginPage() {
                 message = err;
             }
             setErrorMessage(message);
-            setStep('error');
+            setStep('connect');
         }
     };
 
     const stepLabel: Record<LoginStep, string> = {
-        connect: 'Connect Wallet & Sign In',
-        sign: 'Check your wallet - sign the message…',
+        connect: 'Log In',
+        sign: 'Sign the message…',
         verifying: 'Verifying signature…',
-        error: 'Try Again',
     };
 
     const isLoading = step === 'sign' || step === 'verifying';
@@ -119,7 +118,7 @@ export default function LoginPage() {
                     {/* Login card */}
                     <Card className="shadow-xl border-border/50">
                         <CardHeader className="space-y-1 pb-4">
-                            <CardTitle className="text-xl">Sign In</CardTitle>
+                            <CardTitle className="text-xl">Log In</CardTitle>
                             <CardDescription>
                                 Connect your wallet to authenticate. Your wallet address must be
                                 registered by an administrator.
@@ -161,7 +160,7 @@ export default function LoginPage() {
                                 </span>
                             </div>
 
-                            {/* Sign in button */}
+                            {/* Log in button */}
                             <Button
                                 id="sign-in-button"
                                 className="w-full gap-2 h-11"
@@ -172,7 +171,7 @@ export default function LoginPage() {
                                 {isLoading ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
-                                    <Wallet className="h-4 w-4" />
+                                    <LogIn className="h-4 w-4" />
                                 )}
                                 {stepLabel[step]}
                             </Button>

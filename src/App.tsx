@@ -17,8 +17,8 @@ const LocationsPage = lazy(() => import('./pages/locations/LocationsPage'));
 const CreateLocationPage = lazy(() => import('./pages/locations/CreateLocationPage'));
 const ProductsPage = lazy(() => import('./pages/products/ProductsPage'));
 const CreateProductPage = lazy(() => import('./pages/products/CreateProductPage'));
-const TraceProductsPage = lazy(() => import('./pages/trace-products/TraceProductsPage'));
-const TraceProductDetailPage = lazy(() => import('./pages/trace-products/TraceProductDetailPage'));
+const ProductLotsPage = lazy(() => import('./pages/product-lots/ProductLotsPage'));
+const ProductLotDetailPage = lazy(() => import('./pages/product-lots/ProductLotDetailPage'));
 const ScanPage = lazy(() => import('./pages/scan/ScanPage'));
 const ProductHistoryPage = lazy(() => import('./pages/product-history/ProductHistoryPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
@@ -47,7 +47,7 @@ export default function App() {
             <Routes>
                 {/* Public routes */}
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/trace-history/:id" element={<ProductHistoryPage />} />
+                <Route path="/product-history/:id" element={<ProductHistoryPage />} />
 
                 {/* Protected routes inside AppShell */}
                 <Route
@@ -65,8 +65,8 @@ export default function App() {
                     <Route path="locations/new" element={<CreateLocationPage />} />
                     <Route path="products" element={<ProductsPage />} />
                     <Route path="products/new" element={<CreateProductPage />} />
-                    <Route path="trace-products" element={<TraceProductsPage />} />
-                    <Route path="trace-products/:id" element={<TraceProductDetailPage />} />
+                    <Route path="product-lots" element={<ProductLotsPage />} />
+                    <Route path="product-lots/:id" element={<ProductLotDetailPage />} />
                     <Route path="scan" element={<ScanPage />} />
                 </Route>
 

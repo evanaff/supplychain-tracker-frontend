@@ -4,7 +4,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +25,7 @@ export default function CreateProductPage() {
     const {
         register,
         handleSubmit,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<CreateProductFormValues>({
         resolver: zodResolver(createProductSchema),
@@ -58,6 +59,16 @@ export default function CreateProductPage() {
             setImagePreview(null);
         }
     };
+    
+    const handleRemoveImage = () => {
+        setImagePreview(null);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setValue('image', undefined as any);
+        const fileInput = document.getElementById('image') as HTMLInputElement;
+        if (fileInput) {
+            fileInput.value = '';
+        }
+    };
 
     if (!isAdmin) {
         return <Navigate to="/products" replace />;
@@ -74,7 +85,7 @@ export default function CreateProductPage() {
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Add Product</h1>
                         <p className="text-sm text-muted-foreground mt-1">
-                            Create a new traceable product.
+                            Create a new traceable product
                         </p>
                     </div>
                 </div>
@@ -113,10 +124,20 @@ export default function CreateProductPage() {
 
                                 <div className="col-span-2 space-y-2">
                                     <Label htmlFor="image">Product Image <span className="text-destructive">*</span></Label>
+                                    <div>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => document.getElementById('image')?.click()}
+                                        >
+                                            Choose Image
+                                        </Button>
+                                    </div>
                                     <Input
                                         id="image"
                                         type="file"
                                         accept="image/*"
+                                        className="hidden"
                                         {...register('image')}
                                         onChange={(e) => {
                                             register('image').onChange(e); 
@@ -127,8 +148,17 @@ export default function CreateProductPage() {
                                         <p className="text-[13px] text-destructive font-medium">{errors.image.message as string}</p>
                                     )}
                                     {imagePreview && (
-                                        <div className="mt-4 w-full max-w-sm rounded-lg overflow-hidden border">
+                                        <div className="mt-4 relative w-full max-w-sm rounded-lg overflow-hidden border">
                                             <img src={imagePreview} alt="Preview" className="w-full h-auto object-cover" />
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                size="icon"
+                                                className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-md"
+                                                onClick={handleRemoveImage}
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
                                         </div>
                                     )}
                                 </div>
@@ -149,7 +179,7 @@ export default function CreateProductPage() {
                                     Cancel
                                 </Button>
                                 <Button type="submit" disabled={isSubmitting || createMutation.isPending}>
-                                    {createMutation.isPending ? 'Creating…' : 'Create Product'}
+                                    {createMutation.isPending ? 'Creating…' : 'Create'}
                                 </Button>
                             </div>
                         </form>

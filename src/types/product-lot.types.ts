@@ -2,7 +2,7 @@ import type { SupplyChainActivity } from ".";
 import type { Actor } from "./actor.types";
 import type { Product } from "./product.types";
 
-export interface TraceProduct {
+export interface ProductLot {
     id: string;
     lotNumber: string;
     quantity: number;
@@ -13,20 +13,20 @@ export interface TraceProduct {
     owner: Actor;
 }
 
-export interface TraceProductSnapshot {
+export interface ProductLotSnapshot {
     id: string;
     lotNumber: string;
     quantity: number;
 }
 
-export interface TraceProductFilters {
+export interface ProductLotFilters {
     page?: number;
     limit?: number;
     search?: string;
     filter?: SupplyChainActivity | '';
 }
 
-export interface CreateTraceProductPayload {
+export interface CreateProductLotPayload {
     gtin: string;
     quantity: number;
 }

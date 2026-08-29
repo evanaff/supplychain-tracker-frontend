@@ -35,7 +35,7 @@ export const SMART_CONTRACT_ABI = [
         "inputs": [
             {
                 "internalType": "string",
-                "name": "_traceEventId",
+                "name": "productEventId",
                 "type": "string"
             },
             {
@@ -49,7 +49,7 @@ export const SMART_CONTRACT_ABI = [
                 "type": "bytes"
             }
         ],
-        "name": "addTraceEvent",
+        "name": "addProductEvent",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -58,26 +58,26 @@ export const SMART_CONTRACT_ABI = [
         "inputs": [
             {
                 "internalType": "string",
-                "name": "_traceEventId",
+                "name": "productEventId",
                 "type": "string"
             }
         ],
-        "name": "getTraceEventById",
+        "name": "getProductEventById",
         "outputs": [
             {
                 "components": [
-                    {
-                        "internalType": "string",
-                        "name": "traceEventId",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "dataHash",
-                        "type": "bytes32"
-                    }
+                {
+                    "internalType": "string",
+                    "name": "productEventId",
+                    "type": "string"
+                },
+                {
+                    "internalType": "bytes32",
+                    "name": "dataHash",
+                    "type": "bytes32"
+                }
                 ],
-                "internalType": "struct SupplyChainTracker.TraceEvent",
+                "internalType": "struct SupplyChainTracker.ProductEvent",
                 "name": "",
                 "type": "tuple"
             }
@@ -101,29 +101,16 @@ export const SMART_CONTRACT_ABI = [
     {
         "inputs": [
             {
-                "internalType": "address",
-                "name": "_actor",
-                "type": "address"
-            }
-        ],
-        "name": "removeActor",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
                 "internalType": "string",
                 "name": "",
                 "type": "string"
             }
         ],
-        "name": "traceEvents",
+        "name": "productEvents",
         "outputs": [
             {
                 "internalType": "string",
-                "name": "traceEventId",
+                "name": "productEventId",
                 "type": "string"
             },
             {
@@ -133,6 +120,19 @@ export const SMART_CONTRACT_ABI = [
             }
         ],
         "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_actor",
+                "type": "address"
+            }
+        ],
+        "name": "removeActor",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     }
 ];

@@ -2,13 +2,13 @@ import type { ActorSnapshot } from './actor.types';
 import type { SupplyChainActivity } from './index';
 import type { LocationSnapshot } from './location.types';
 import type { ProductSnapshot } from './product.types';
-import type { TraceProduct, TraceProductSnapshot } from './trace-product.types';
+import type { ProductLot, ProductLotSnapshot } from './product-lot.types';
 
-export interface TraceEvent {
+export interface ProductEvent {
     id: string;
-    traceProductId: string;
+    productLotId: string;
 
-    traceProductJson: TraceProductSnapshot;
+    productLotJson: ProductLotSnapshot;
     productJson: ProductSnapshot;
     actorJson: ActorSnapshot;
     sourceLocationJson: LocationSnapshot;
@@ -21,8 +21,8 @@ export interface TraceEvent {
     isSubmitted: boolean;
 }
 
-export interface CreateTraceEventDTO {
-  traceProductId: string;
+export interface CreateProductEventDTO {
+  productLotId: string;
   supplyChainActivity: SupplyChainActivity;
   destinationLocationGln?: string;
 }
@@ -31,7 +31,7 @@ export interface SubmitEventPayload {
     signature: string;
 }
 
-export interface TraceVerificationResult {
+export interface VerificationResult {
     totalEvents: number;
     validEvents: string[];
     invalidEvents: string[];
@@ -43,6 +43,6 @@ export interface EventValidationResult {
 }
 
 export interface ProductHistory {
-    traceProduct: TraceProduct;
-    traceEvents: TraceEvent[];
+    productLot: ProductLot;
+    productEvents: ProductEvent[];
 }

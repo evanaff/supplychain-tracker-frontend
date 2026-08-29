@@ -5,8 +5,8 @@ import {
     MapPin,
     ChevronRight,
     ScanLine,
-    Route,
     Apple,
+    Package,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -21,11 +21,11 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     { to: '/', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" />, roles: ['ADMIN'] },
-    { to: '/trace-products', label: 'Trace Products', icon: <Route className="h-4 w-4" /> },
+    { to: '/product-lots', label: 'Product Lots', icon: <Package className="h-4 w-4" /> },
     { to: '/products', label: 'Products', icon: <Apple className="h-4 w-4" /> },
     { to: '/actors', label: 'Actors', icon: <Users className="h-4 w-4" />, roles: ['ADMIN'] },
     { to: '/locations', label: 'Locations', icon: <MapPin className="h-4 w-4" />, roles: ['ADMIN'] },
-    { to: '/scan', label: 'Scan', icon: <ScanLine className="h-4 w-4" />, roles: ['GROWER', 'DISTRIBUTOR', 'RETAILER'] },
+    { to: '/scan', label: 'Scan', icon: <ScanLine className="h-4 w-4" /> },
 ];
 
 interface SidebarProps {

@@ -1,13 +1,13 @@
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, Sprout, Truck, Store, Route, Apple } from 'lucide-react';
+import { MapPin, Sprout, Truck, Store, Apple, Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { dashboardApi } from '@/api/dashboard.api';
 import config from '@/config';
-import type { DashboardStats } from '@/types/dashboard.types';
+import type { DashboardData } from '@/types/dashboard.types';
 
 function StatCard({
     title,
@@ -38,7 +38,7 @@ function StatCard({
 function AdminDashboard() {
     const { data, isLoading, isError, error } = useQuery({
         queryKey: ['dashboard', 'admin'],
-        queryFn: () => dashboardApi.getAdminStats().then((r) => r.data.data),
+        queryFn: () => dashboardApi.getDashboardData().then((r) => r.data.data),
     });
 
     if (isLoading) {
@@ -62,7 +62,7 @@ function AdminDashboard() {
         return <p className="text-destructive text-sm">{error?.message || "Failed to load dashboard stats."}</p>;
     }
 
-    const stats = data as DashboardStats;
+    const stats = data as DashboardData;
 
     return (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -97,9 +97,9 @@ function AdminDashboard() {
                 color="bg-rose-50"
             />
             <StatCard
-                title="Total Trace Products"
-                value={stats.totalTraceProducts}
-                icon={<Route className="h-9 w-9 text-cyan-700" />}
+                title="Total Product Lots"
+                value={stats.totalProductLots}
+                icon={<Package className="h-9 w-9 text-cyan-700" />}
                 color="bg-cyan-50"
             />
         </div>
@@ -112,7 +112,7 @@ export default function DashboardPage() {
     const { actor, isAdmin } = useAuth();
 
     if (!isAdmin) {
-        return <Navigate to="/trace-products" replace />;
+        return <Navigate to="/product-lots" replace />;
     }
 
     return (
@@ -122,7 +122,7 @@ export default function DashboardPage() {
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
                     <p className="text-muted-foreground text-sm">
-                        Welcome back, {actor?.name ?? 'user'}.
+                        Welcome back, {actor?.name ?? 'user'}
                     </p>
                 </div>
 

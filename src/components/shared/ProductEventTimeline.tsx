@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { formatDateTime } from '@/lib/utils';
 import { StatusBadge } from '@/components/shared/StatusBadge';
-import type { TraceEvent, TraceVerificationResult } from '@/types/trace-event.types';
+import type { ProductEvent, VerificationResult } from '@/types/product-event.types';
 import {
     Clock,
     MapPin,
@@ -18,9 +18,9 @@ import {
 import config from '@/config';
 import type { SupplyChainActivity } from '@/types';
 
-interface EventTimelineProps {
-    events: TraceEvent[];
-    verificationResult?: TraceVerificationResult | null;
+interface ProductEventTimelineProps {
+    events: ProductEvent[];
+    verificationResult?: VerificationResult | null;
     className?: string;
     hideChainStatus?: boolean;
 }
@@ -34,7 +34,7 @@ const activityConfig: Record<SupplyChainActivity, { icon: LucideIcon; color: str
 
 const defaultConfig = { icon: Package, color: 'border-gray-500 text-gray-600', mutedColor: 'border-gray-300/50 text-gray-400/50' };
 
-export function EventTimeline({ events, verificationResult, className, hideChainStatus }: EventTimelineProps) {
+export function ProductEventTimeline({ events, verificationResult, className, hideChainStatus }: ProductEventTimelineProps) {
     if (events.length === 0) {
         return (
             <p className="text-sm text-muted-foreground text-center py-6">

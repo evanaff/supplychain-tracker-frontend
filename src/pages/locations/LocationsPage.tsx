@@ -64,7 +64,7 @@ export default function LocationsPage() {
     });
 
     if (!isAdmin) {
-        return <Navigate to="/trace-products" replace />;
+        return <Navigate to="/product-lots" replace />;
     }
 
     return (
@@ -73,9 +73,9 @@ export default function LocationsPage() {
             <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Locations</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">Location List</h1>
                         <p className="text-muted-foreground text-sm">
-                            Supply chain locations
+                            Supply chain location list
                         </p>
                     </div>
                     <Button id="create-location-button" onClick={() => navigate('/locations/new')} className="gap-2">
