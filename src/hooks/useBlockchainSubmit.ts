@@ -26,7 +26,7 @@ export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
     const [error, setError] = useState<string | null>(null);
 
     const submit = useCallback(
-        async (eventId: string) => {
+        async (productEventId: string, productLotId: string) => {
             setStatus('fetching-hash');
             setError(null);
 
@@ -38,7 +38,7 @@ export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
                 }
 
                 // Get Data Hash
-                const hashRes = await productEventsApi.getEventHash(eventId);
+                const hashRes = await productEventsApi.getEventHash(productEventId);
                 const { dataHash, messageHash } = hashRes.data.data;
 
                 const signer = await getSigner();
@@ -57,7 +57,8 @@ export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
                 );
 
                 const tx = await supplyChainTracker.addProductEvent(
-                    eventId,
+                    productEventId,
+                    productLotId,
                     dataHash,
                     signature
                 );
@@ -70,7 +71,7 @@ export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
 
                 // Save Transaction Hash Off-Chain
                 setStatus('saving-tx');
-                await productEventsApi.saveTxHash(eventId, tx.hash);
+                await productEventsApi.saveTxHash(productEventId, tx.hash);
 
                 // Invalidate Relevant Caches
                 if (options.invalidateKeys) {

@@ -78,12 +78,16 @@ export function ProductEventTimeline({ events, verificationResult, className, hi
                             <div
                                 className={cn(
                                     'rounded-lg border-2 p-3 -m-3 transition-colors',
+
                                     verificationResult?.validEvents.includes(event.id)
                                         ? 'border-emerald-300 dark:border-emerald-800'
+
                                         : verificationResult?.invalidEvents.includes(event.id)
                                             ? 'border-red-300 dark:border-red-800'
-                                            : verificationResult?.missingEvents.includes(event.id)
-                                                ? 'border-amber-300 dark:border-amber-800'
+
+                                            : verificationResult?.unrecordedEvents.includes(event.id)
+                                                ? 'border-gray-300 dark:border-gray-700'
+
                                                 : 'border-transparent'
                                 )}
                             >
@@ -92,9 +96,9 @@ export function ProductEventTimeline({ events, verificationResult, className, hi
                                     {!hideChainStatus && (
                                         <Badge
                                             variant="outline"
-                                            className={cn('text-xs', event.isSubmitted ? 'on-chain' : 'off-chain')}
+                                            className={cn('text-xs', event.txHash ? 'on-chain' : 'off-chain')}
                                         >
-                                            {event.isSubmitted ? 'On-chain' : 'Pending Submit'}
+                                            {event.txHash ? 'On-chain' : 'Pending Submit'}
                                         </Badge>
                                     )}
                                 </div>

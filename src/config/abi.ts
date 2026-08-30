@@ -35,7 +35,12 @@ export const SMART_CONTRACT_ABI = [
         "inputs": [
             {
                 "internalType": "string",
-                "name": "productEventId",
+                "name": "_productEventId",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "_productLotId",
                 "type": "string"
             },
             {
@@ -58,28 +63,16 @@ export const SMART_CONTRACT_ABI = [
         "inputs": [
             {
                 "internalType": "string",
-                "name": "productEventId",
+                "name": "_productLotId",
                 "type": "string"
             }
         ],
-        "name": "getProductEventById",
+        "name": "getProductEventIdsByProductLotId",
         "outputs": [
             {
-                "components": [
-                {
-                    "internalType": "string",
-                    "name": "productEventId",
-                    "type": "string"
-                },
-                {
-                    "internalType": "bytes32",
-                    "name": "dataHash",
-                    "type": "bytes32"
-                }
-                ],
-                "internalType": "struct SupplyChainTracker.ProductEvent",
+                "internalType": "string[]",
                 "name": "",
-                "type": "tuple"
+                "type": "string[]"
             }
         ],
         "stateMutability": "view",

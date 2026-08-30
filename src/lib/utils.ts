@@ -22,17 +22,6 @@ export function formatDate(iso: string): string {
     return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(iso));
 }
 
-export function formatActivity(activity: SupplyChainActivity | 'CREATED'): string {
-    const labels: Record<SupplyChainActivity | 'CREATED', string> = {
-        CREATED: 'Created',
-        HARVESTING: 'Harvesting',
-        SHIPPING: 'Shipping',
-        RECEIVING: 'Receiving',
-        SELLING: 'Selling',
-    };
-    return labels[activity] ?? activity;
-}
-
 export function activityVariant(
     activity: SupplyChainActivity | 'CREATED',
 ): 'default' | 'secondary' | 'destructive' | 'outline' {
