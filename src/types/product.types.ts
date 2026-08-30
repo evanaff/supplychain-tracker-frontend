@@ -9,7 +9,6 @@ export interface ProductSnapshot {
     gtin: string;
     varietyName: string;
     unitOfMeasure: string;
-    imageUrl: string;
 }
 
 export interface ProductFilters {

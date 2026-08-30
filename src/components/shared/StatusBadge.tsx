@@ -1,6 +1,5 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { formatActivity } from '@/lib/utils';
 import type { SupplyChainActivity } from '@/types/index';
 
 interface StatusBadgeProps {
@@ -22,7 +21,7 @@ export function StatusBadge({ activity, className }: StatusBadgeProps) {
             variant="outline"
             className={cn('font-medium border', activityStyles[activity], className)}
         >
-            {formatActivity(activity)}
+            {activity}
         </Badge>
     );
 }

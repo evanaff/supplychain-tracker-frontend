@@ -80,7 +80,7 @@ export default function ProductLotDetailPage() {
         );
     }
 
-    const pendingEvents = history?.productEvents.filter((e) => !e.isSubmitted) ?? [];
+    const pendingEvents = history?.productEvents.filter((e) => !e.txHash) ?? [];
     const activePendingEventId =
         pendingEvents.length === 1
         ? pendingEvents[0].id
@@ -274,10 +274,10 @@ export default function ProductLotDetailPage() {
                                                         <SelectValue placeholder="Select activity" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="HARVESTING">Harvesting</SelectItem>
-                                                        <SelectItem value="SHIPPING">Shipping</SelectItem>
-                                                        <SelectItem value="RECEIVING">Receiving</SelectItem>
-                                                        <SelectItem value="SELLING">Selling</SelectItem>
+                                                        <SelectItem value="HARVESTING">HARVESTING</SelectItem>
+                                                        <SelectItem value="SHIPPING">SHIPPING</SelectItem>
+                                                        <SelectItem value="RECEIVING">RECEIVING</SelectItem>
+                                                        <SelectItem value="SELLING">SELLING</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -334,12 +334,13 @@ export default function ProductLotDetailPage() {
                                                 </Select>
 
                                                 <BlockchainSubmitButton
-                                                eventId={activePendingEventId}
-                                                disabled={!activePendingEventId}
-                                                invalidateKeys={[
-                                                    ['product-lot', id!],
-                                                    ['product-history', id!],
-                                                ]}
+                                                    productEventId={activePendingEventId}
+                                                    productLotId={history?.productLot.id}
+                                                    disabled={!activePendingEventId || !history?.productLot.id}
+                                                    invalidateKeys={[
+                                                        ['product-lot', id!],
+                                                        ['product-history', id!],
+                                                    ]}
                                                 />
                                             </div>
                                             </div>

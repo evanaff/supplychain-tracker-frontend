@@ -18,7 +18,6 @@ export interface ProductEvent {
     timestamp: string;
 
     txHash: string | null;
-    isSubmitted: boolean;
 }
 
 export interface CreateProductEventDTO {
@@ -35,6 +34,7 @@ export interface VerificationResult {
     totalEvents: number;
     validEvents: string[];
     invalidEvents: string[];
+    unrecordedEvents: string[];
     missingEvents: string[];
 }
 

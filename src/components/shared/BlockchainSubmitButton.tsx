@@ -4,7 +4,8 @@ import { useBlockchainSubmit } from '@/hooks/useBlockchainSubmit';
 import { Loader2, AlertTriangle, Link } from 'lucide-react';
 
 interface BlockchainSubmitButtonProps {
-    eventId: string;
+    productEventId: string;
+    productLotId?: string;
     invalidateKeys?: string[][];
     onSuccess?: () => void;
     className?: string;
@@ -23,7 +24,8 @@ const statusLabel: Record<string, string> = {
 };
 
 export function BlockchainSubmitButton({
-    eventId,
+    productEventId,
+    productLotId,
     invalidateKeys,
     onSuccess,
     className,
@@ -34,17 +36,19 @@ export function BlockchainSubmitButton({
     });
 
     const handleClick = async () => {
-        const ok = await submit(eventId);
+        if (!productEventId || !productLotId) return;
+
+        const ok = await submit(productEventId, productLotId);
         if (ok) {
-        onSuccess?.();
-        reset();
+            onSuccess?.();
+            reset();
         }
     };
 
     return (
         <div className={cn('flex flex-col gap-1', className)}>
             <Button
-                id={`blockchain-submit-${eventId}`}
+                id={`blockchain-submit-${productEventId}`}
                 onClick={() => void handleClick()}
                 disabled={disabled || isPending}
                 className="gap-2 transition-all"
