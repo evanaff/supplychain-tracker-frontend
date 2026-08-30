@@ -21,7 +21,9 @@ export const productLotsApi = {
         ),
 
     getHistory: (id: string) =>
-        apiClient.get<ApiResponse<ProductHistory>>(`/api/product-lots/${id}`),
+        apiClient.get<ApiResponse<ProductHistory>>(
+            `/api/product-lots/${id}`
+        ),
 
     verify: (id: string) =>
         apiClient.post<ApiResponse<VerificationResult>>(

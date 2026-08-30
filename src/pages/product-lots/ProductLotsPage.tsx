@@ -273,7 +273,7 @@ export default function ProductLotsPage() {
                                     Cancel
                                 </Button>
                                 <Button type="submit" disabled={isSubmitting || createMutation.isPending}>
-                                    {createMutation.isPending ? 'Creating…' : 'Create Lot'}
+                                    {createMutation.isPending ? 'Creating…' : 'Add Product Lot'}
                                 </Button>
                             </DialogFooter>
                         </form>

@@ -174,7 +174,7 @@ Thank you.`);
                                         ) : (
                                             <ShieldCheck className="h-4 w-4" />
                                         )}
-                                        {verifyMutation.isPending ? 'Verifying…' : 'Verify Full History'}
+                                        {verifyMutation.isPending ? 'Verifying…' : 'Verify Product History'}
                                     </Button>
                                 </CardHeader>
                                 <CardContent className="space-y-4">

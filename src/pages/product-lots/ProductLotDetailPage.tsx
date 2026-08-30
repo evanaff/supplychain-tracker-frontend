@@ -47,18 +47,6 @@ export default function ProductLotDetailPage() {
         enabled: Boolean(id),
     });
 
-    // const { data: tp, isLoading, isError, error } = useQuery({
-    //     queryKey: ['product-lot', id],
-    //     queryFn: () => productLotsApi.getById(id!).then((r) => r.data.data.productLot),
-    //     enabled: Boolean(id),
-    // });
-
-    // const { data: history } = useQuery({
-    //     queryKey: ['product-history', id],
-    //     queryFn: () => productLotsApi.getHistory(id!).then((r) => r.data.data),
-    //     enabled: Boolean(id),
-    // });
-
     const createEventMutation = useMutation({
         mutationFn: async (payload: { activity: SupplyChainActivity; destinationGln?: string }) => {
             return productEventsApi.create({
@@ -71,7 +59,6 @@ export default function ProductLotDetailPage() {
             void queryClient.invalidateQueries({ queryKey: ['product-lot', id] });
             void queryClient.invalidateQueries({ queryKey: ['product-history', id] });
             setActionError(null);
-            // setIsDialogOpen(false);
             setSelectedActivity('');
             setDestinationGln('');
         },
@@ -233,6 +220,10 @@ export default function ProductLotDetailPage() {
                                 <CardContent>
                                     <div className="grid gap-4 sm:grid-cols-2 text-sm">
                                         <div>
+                                            <p className="text-muted-foreground mb-1">ID</p>
+                                            <p className="font-semibold font-mono">{history?.productLot.id}</p>
+                                        </div>
+                                        <div>
                                             <p className="text-muted-foreground mb-1">Lot Number</p>
                                             <p className="font-semibold font-mono">{history?.productLot.lotNumber}</p>
                                         </div>
@@ -280,7 +271,7 @@ export default function ProductLotDetailPage() {
                                                     onValueChange={(val) => setSelectedActivity(val as SupplyChainActivity)}
                                                 >
                                                     <SelectTrigger id="activity-select">
-                                                        <SelectValue placeholder="Select activity..." />
+                                                        <SelectValue placeholder="Select activity" />
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="HARVESTING">Harvesting</SelectItem>
@@ -313,7 +304,7 @@ export default function ProductLotDetailPage() {
                                                 (selectedActivity === 'SHIPPING' && !destinationGln)
                                                 }
                                             >
-                                                {createEventMutation.isPending ? 'Recording…' : 'Record Product Event'}
+                                                {createEventMutation.isPending ? 'Recording…' : 'Record'}
                                             </Button>
                                         </div>
 
