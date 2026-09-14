@@ -2,12 +2,10 @@ import { useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AppShell } from './components/shared/AppShell/AppShell';
 import { ProtectedRoute } from './components/shared/ProtectedRoute';
-import { setApiClientNavigate, setApiClientClearAuth } from './api/client';
 import { useAuth } from './hooks/useAuth';
-
-// Pages
 import { lazy, Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { setFetchAuthHandlers } from './lib/fetch';
 
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
@@ -35,12 +33,30 @@ function PageLoader() {
 
 export default function App() {
     const navigate = useNavigate();
-    const { clearAuth } = useAuth();
+    const { clearAuth, updateTokens } = useAuth();
 
     useEffect(() => {
-        setApiClientNavigate((path: string) => navigate(path));
-        setApiClientClearAuth(() => clearAuth());
-    }, [navigate, clearAuth]);
+        setFetchAuthHandlers({
+            navigate: (path: string) =>
+                navigate(path),
+
+            clearAuth: () =>
+                clearAuth(),
+
+            updateTokens: (
+                accessToken: string,
+                refreshToken: string,
+            ) =>
+                updateTokens(
+                    accessToken,
+                    refreshToken,
+                ),
+        });
+
+        return () => {
+            setFetchAuthHandlers(null);
+        };
+    }, [navigate, clearAuth, updateTokens]);
 
     return (
         <Suspense fallback={<PageLoader />}>

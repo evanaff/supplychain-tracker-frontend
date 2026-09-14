@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
-import type { AuthActor } from '@/types/auth.types';
+import type { AuthActor } from '@/types';
 
 export function useAuth() {
     const { state, dispatch } = useAuthContext();

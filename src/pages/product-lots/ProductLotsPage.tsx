@@ -1,8 +1,7 @@
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, ExternalLink, RefreshCw } from 'lucide-react';
+import { Plus, ExternalLink } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -36,7 +35,6 @@ import { Pagination } from '@/components/shared/Pagination';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { ErrorStateWithRetry } from '@/components/shared/ErrorState';
 import { RoleGuard } from '@/components/shared/RoleGuard';
-import { productLotsApi } from '@/api/product-lots.api';
 import { usePagination } from '@/hooks/usePagination';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -44,8 +42,10 @@ import {
     type CreateProductLotFormValues,
 } from './schemas/productLot.schema';
 import config from '@/config';
-import type { SupplyChainActivity } from '@/types/index';
+import type { SupplyChainActivity } from '@/types';
 import { ProductCombobox } from '@/components/shared/ProductCombobox';
+import { fetchWithAuth } from '@/lib/fetch';
+import type { ProductLot } from '@/types';
 
 const productEventSequence = [
     'CREATED',
@@ -64,20 +64,88 @@ export default function ProductLotsPage() {
     useDocumentTitle(`Product Lots - ${config.app.name}`);
 
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
     const { page, limit, setPage } = usePagination();
+    const { isGrower } = useAuth();
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<SupplyChainActivity | ''>('');
     const [dialogOpen, setDialogOpen] = useState(false);
-    const { isGrower } = useAuth();
+    const [productLots, setProductLots] = useState<ProductLot[]>([]);
+    const [totalPages, setTotalPages] = useState(1);
+    const [error, setError] = useState<string | null>(null);
+    const [retryCount, setRetryCount] = useState(0);
+    const [completedRequestKey, setCompletedRequestKey] = useState<string | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
-    const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
-        queryKey: ['product-lots', page, limit, search, statusFilter],
-        queryFn: () =>
-            productLotsApi
-                .list({ page, limit, search: search || undefined, filter: statusFilter || undefined })
-                .then((r) => r.data.data),
-    });
+    const requestKey = [
+        page,
+        limit,
+        search,
+        statusFilter,
+    ].join('|');
+    const isLoading = completedRequestKey !== requestKey;
+
+    useEffect(() => {
+        let isActive = true;
+
+        const fetchProductLots = async () => {
+            try {
+                const params = new URLSearchParams({
+                    page: String(page),
+                    limit: String(limit),
+                });
+
+                if (search) {
+                    params.set('search', search);
+                }
+
+                if (statusFilter) {
+                    params.set('filter', statusFilter);
+                }
+
+                const response = await fetchWithAuth(
+                    `${config.api.baseUrl}/api/product-lots?${params.toString()}`,
+                );
+
+                if (!response.ok) {
+                    const errorResult = await response.json();
+                    throw new Error(errorResult.message ?? 'Failed to load product lots');
+                }
+
+                const result = await response.json();
+
+                if (!isActive) return;
+
+                setProductLots(result.data.productLots,);
+                setTotalPages(result.data.pagination.totalPages);
+                setError(null);
+            } catch (err) {
+                if (!isActive) return;
+
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError('Failed to load product lots.');
+                }
+            } finally {
+                if (isActive) {
+                    setCompletedRequestKey(requestKey);
+                }
+            }
+        };
+
+        fetchProductLots();
+
+        return () => {
+            isActive = false;
+        };
+    }, [
+        page,
+        limit,
+        search,
+        statusFilter,
+        retryCount,
+        requestKey,
+    ]);
 
     const {
         register,
@@ -89,17 +157,42 @@ export default function ProductLotsPage() {
         resolver: zodResolver(CreateProductLotSchema),
     });
 
-    const createMutation = useMutation({
-        mutationFn: (values: CreateProductLotFormValues) => productLotsApi.create(values),
-        onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: ['product-lots'] });
+    const onSubmit = async (
+        values: CreateProductLotFormValues,
+    ) => {
+        setSubmitError(null);
+
+        try {
+            const response = await fetchWithAuth(
+                `${config.api.baseUrl}/api/product-lots`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':
+                            'application/json',
+                    },
+                    body: JSON.stringify(values),
+                },
+            );
+
+            if (!response.ok) {
+                const errorResult = await response.json();
+                throw new Error(errorResult.message ?? 'Failed to create product lot');
+            }
+
             setDialogOpen(false);
             reset();
-        },
-    });
 
-    const onSubmit = (values: CreateProductLotFormValues) => {
-        createMutation.mutate(values);
+            setRetryCount(
+                (value) => value + 1,
+            );
+        } catch (err) {
+            if (err instanceof Error) {
+                setSubmitError(err.message);
+            } else {
+                setSubmitError('Failed to create product lot');
+            }
+        }
     };
 
     return (
@@ -119,7 +212,7 @@ export default function ProductLotsPage() {
                             className="gap-2"
                         >
                             <Plus className="h-4 w-4" />
-                            Create Lot
+                            Add Product Lot
                         </Button>
                     </RoleGuard>
                 </div>
@@ -145,20 +238,10 @@ export default function ProductLotsPage() {
                             ))}
                         </SelectContent>
                     </Select>
-                    <Button
-                        id="refresh-product-lots"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => void refetch()}
-                        disabled={isFetching}
-                        title="Refresh data"
-                    >
-                        <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-                    </Button>
                 </div>
 
-                {isError ? (
-                    <ErrorStateWithRetry onRetry={() => void refetch()} description={error?.message} />
+                {error ? (
+                    <ErrorStateWithRetry onRetry={() => setRetryCount((value) => value + 1)} description={error} />
                 ) : (
                     <div className="rounded-lg border bg-card">
                         <Table>
@@ -184,7 +267,7 @@ export default function ProductLotsPage() {
                                                 <TableCell />
                                             </TableRow>
                                         ))
-                                    : data?.productLots.map((pl) => (
+                                    : productLots.map((pl) => (
                                             <TableRow
                                                 key={pl.id}
                                                 className="cursor-pointer hover:bg-muted/50"
@@ -218,7 +301,7 @@ export default function ProductLotsPage() {
 
                 <Pagination
                     page={page}
-                    totalPages={data?.pagination.totalPages ?? 1}
+                    totalPages={totalPages}
                     onPageChange={setPage}
                 />
             </div>
@@ -237,12 +320,12 @@ export default function ProductLotsPage() {
                                     name="gtin"
                                     control={control}
                                     render={({ field }) => (
-                                    <ProductCombobox
-                                    id="gtin-select"
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    error={!!errors.gtin}
-                                    />
+                                        <ProductCombobox
+                                            id="gtin-select"
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            error={!!errors.gtin}
+                                        />
                                     )}
                                 />
                                 {errors.gtin && (
@@ -262,18 +345,15 @@ export default function ProductLotsPage() {
                                 )}
                             </div>
 
-                            {createMutation.isError && (
+                            {submitError && (
                                 <p className="text-sm text-destructive">
-                                    {createMutation.error.message}
+                                    {submitError}
                                 </p>
                             )}
 
                             <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); reset(); }}>
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={isSubmitting || createMutation.isPending}>
-                                    {createMutation.isPending ? 'Creating…' : 'Add Product Lot'}
+                                <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Submitting…' : 'Submit'}
                                 </Button>
                             </DialogFooter>
                         </form>

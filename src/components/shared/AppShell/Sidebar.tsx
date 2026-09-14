@@ -20,7 +20,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-    { to: '/', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" />, roles: ['ADMIN'] },
+    { to: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" />, roles: ['ADMIN'] },
     { to: '/product-lots', label: 'Product Lots', icon: <Package className="h-4 w-4" /> },
     { to: '/products', label: 'Products', icon: <Apple className="h-4 w-4" /> },
     { to: '/actors', label: 'Actors', icon: <Users className="h-4 w-4" />, roles: ['ADMIN'] },
@@ -49,7 +49,7 @@ export function Sidebar({ onClose }: SidebarProps) {
                     className="h-12 w-12 rounded-lg" 
                 />
                 <div>
-                    <p className="text-sl font-bold text-sidebar-foreground leading-tight">Supply Chain</p>
+                    <p className="text-sl font-bold text-sidebar-foreground leading-tight">Fruit Supply Chain</p>
                     <p className="text-xm text-sidebar-foreground/60 leading-tight">Tracker</p>
                 </div>
             </div>

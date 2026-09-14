@@ -17,6 +17,9 @@ const config = {
     contract: {
         address: env.VITE_CONTRACT_ADDRESS,
     },
+    report: {
+        email: env.VITE_REPORT_EMAIL
+    }
 }
 
 export default config;

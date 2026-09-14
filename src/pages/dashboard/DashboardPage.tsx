@@ -1,13 +1,13 @@
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Navigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { MapPin, Sprout, Truck, Store, Apple, Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
-import { dashboardApi } from '@/api/dashboard.api';
 import config from '@/config';
-import type { DashboardData } from '@/types/dashboard.types';
+import type { DashboardData } from '@/types';
+import { fetchWithAuth } from '@/lib/fetch';
+import { useEffect, useState } from 'react';
 
 function StatCard({
     title,
@@ -36,10 +36,37 @@ function StatCard({
 }
 
 function AdminDashboard() {
-    const { data, isLoading, isError, error } = useQuery({
-        queryKey: ['dashboard', 'admin'],
-        queryFn: () => dashboardApi.getDashboardData().then((r) => r.data.data),
-    });
+    const [data, setData] = useState<DashboardData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const response = await fetchWithAuth(
+                    `${config.api.baseUrl}/api/dashboard`,
+                );
+
+                if (!response.ok) {
+                    const errorResult = await response.json();
+                    throw new Error(errorResult.message ?? 'Failed to load dashboard stats');
+                }
+
+                const result = await response.json();
+                setData(result.data);
+            } catch (err) {
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError('Failed to load dashboard stats');
+                }
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDashboardData();   
+    }, []);
 
     if (isLoading) {
         return (
@@ -58,47 +85,45 @@ function AdminDashboard() {
         );
     }
 
-    if (isError || !data) {
-        return <p className="text-destructive text-sm">{error?.message || "Failed to load dashboard stats."}</p>;
+    if (error || !data) {
+        return <p className="text-destructive text-sm">{error ?? "Failed to load dashboard stats."}</p>;
     }
-
-    const stats = data as DashboardData;
 
     return (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <StatCard
                 title="Total Growers"
-                value={stats.totalGrowers}
+                value={data.totalGrowers}
                 icon={<Sprout className="h-9 w-9 text-emerald-700" />}
                 color="bg-emerald-50"
             />
             <StatCard
                 title="Total Distributors"
-                value={stats.totalDistributors}
+                value={data.totalDistributors}
                 icon={<Truck className="h-9 w-9 text-blue-700" />}
                 color="bg-blue-50"
             />
             <StatCard
                 title="Total Retailers"
-                value={stats.totalRetailers}
+                value={data.totalRetailers}
                 icon={<Store className="h-9 w-9 text-violet-700" />}
                 color="bg-violet-50"
             />
             <StatCard
                 title="Total Locations"
-                value={stats.totalLocations}
+                value={data.totalLocations}
                 icon={<MapPin className="h-9 w-9 text-amber-700" />}
                 color="bg-amber-50"
             />
             <StatCard
                 title="Total Products"
-                value={stats.totalProducts}
+                value={data.totalProducts}
                 icon={<Apple className="h-9 w-9 text-rose-700" />}
                 color="bg-rose-50"
             />
             <StatCard
                 title="Total Product Lots"
-                value={stats.totalProductLots}
+                value={data.totalProductLots}
                 icon={<Package className="h-9 w-9 text-cyan-700" />}
                 color="bg-cyan-50"
             />

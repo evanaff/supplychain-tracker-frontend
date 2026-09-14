@@ -1,19 +1,18 @@
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { Package, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SearchBar } from '@/components/shared/SearchBar';
 import { Pagination } from '@/components/shared/Pagination';
 import { ErrorStateWithRetry } from '@/components/shared/ErrorState';
-import { productsApi } from '@/api/products.api';
 import { usePagination } from '@/hooks/usePagination';
 import { useAuth } from '@/hooks/useAuth';
 import config from '@/config';
 import { Button } from '@/components/ui/button';
-import type { Product } from '@/types/product.types';
+import type { Product } from '@/types';
+import { fetchWithAuth } from '@/lib/fetch';
 
 function ProductCard({ product }: { product: Product }) {
     return (
@@ -82,16 +81,74 @@ export default function ProductsPage() {
     const { isAdmin } = useAuth();
     const { page, limit, setPage } = usePagination();
     const [search, setSearch] = useState('');
+    const [products, setProducts] = useState<Product[]>([]);
+    const [totalPages, setTotalPages] = useState(1);
+    const [error, setError] = useState<string | null>(null);
+    const [retryCount, setRetryCount] = useState(0);
+    const [completedRequestKey, setCompletedRequestKey] = useState<string | null>(null);
 
-    const { data, isLoading, isError, error, refetch } = useQuery({
-        queryKey: ['products', page, limit, search],
-        queryFn: () =>
-            productsApi.list({ page, limit, search: search || undefined }).then((r) => r.data.data),
-    });
+    const requestKey = [
+        page,
+        limit,
+        search,
+        retryCount,
+    ].join('|');
+    const isLoading = completedRequestKey !== requestKey;
+
+    useEffect(() => {
+        let isActive = true;
+
+        const fetchProducts = async () => {
+            try {
+                const params = new URLSearchParams({
+                    page: String(page),
+                    limit: String(limit),
+                });
+
+                if (search) {
+                    params.set('search', search);
+                }
+
+                const response = await fetchWithAuth(
+                    `${config.api.baseUrl}/api/products?${params.toString()}`,
+                );
+
+                if (!response.ok) {
+                    const errorResult = await response.json();
+                    throw new Error(errorResult.message ?? 'Failed to load products');
+                }
+
+                const result = await response.json();
+
+                if (!isActive) return;
+
+                setProducts(result.data.products);
+                setTotalPages(result.data.pagination.totalPages);
+                setError(null);
+            } catch (err) {
+                if (!isActive) return;
+
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError('Failed to load products');
+                }
+            } finally {
+                if (isActive) {
+                    setCompletedRequestKey(requestKey);
+                }
+            }
+        };
+
+        fetchProducts();
+
+        return () => {
+            isActive = false;
+        };
+    }, [page, limit, search, retryCount, requestKey]);
 
     return (
         <>
-            
             <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
@@ -112,19 +169,19 @@ export default function ProductsPage() {
                     className="max-w-sm"
                 />
 
-                {isError ? (
-                    <ErrorStateWithRetry onRetry={() => void refetch()} description={error?.message} />
+                {error ? (
+                    <ErrorStateWithRetry onRetry={() => setRetryCount((value) => value + 1)} description={error} />
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {isLoading
                             ? Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
-                            : data?.products.map((product) => (
+                            : products.map((product) => (
                                 <ProductCard key={product.gtin} product={product} />
                             ))}
                     </div>
                 )}
 
-                {!isLoading && data?.products.length === 0 && (
+                {!isLoading && products.length === 0 && (
                     <div className="text-center py-12 text-muted-foreground text-sm">
                         No products found.
                     </div>
@@ -132,7 +189,7 @@ export default function ProductsPage() {
 
                 <Pagination
                     page={page}
-                    totalPages={data?.pagination.totalPages ?? 1}
+                    totalPages={totalPages}
                     onPageChange={setPage}
                 />
             </div>

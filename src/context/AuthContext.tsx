@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { AuthActor, AuthState } from '@/types/auth.types';
+import type { AuthActor, AuthState } from '@/types';
 
 export type AuthAction =
     | {

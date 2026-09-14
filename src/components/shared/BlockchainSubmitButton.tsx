@@ -1,19 +1,18 @@
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useBlockchainSubmit } from '@/hooks/useBlockchainSubmit';
-import { Loader2, AlertTriangle, Link } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 
 interface BlockchainSubmitButtonProps {
     productEventId: string;
     productLotId?: string;
-    invalidateKeys?: string[][];
     onSuccess?: () => void;
     className?: string;
     disabled?: boolean;
 }
 
 const statusLabel: Record<string, string> = {
-    idle: 'Submit to Blockchain',
+    idle: 'Submit',
     'fetching-hash': 'Fetching hash…',
     'waiting-signature': 'Waiting for signature…',
     submitting: 'Submitting transaction…',
@@ -26,14 +25,11 @@ const statusLabel: Record<string, string> = {
 export function BlockchainSubmitButton({
     productEventId,
     productLotId,
-    invalidateKeys,
     onSuccess,
     className,
     disabled,
 }: BlockchainSubmitButtonProps) {
-    const { submit, reset, status, error, isPending } = useBlockchainSubmit({
-        invalidateKeys,
-    });
+    const { submit, reset, status, error, isPending } = useBlockchainSubmit();
 
     const handleClick = async () => {
         if (!productEventId || !productLotId) return;
@@ -55,10 +51,7 @@ export function BlockchainSubmitButton({
             >
                 {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                 {status === 'error' && <AlertTriangle className="h-4 w-4" />}
-                {!isPending && status !== 'error' && (
-                    <Link className="h-4 w-4" />
-                )}
-                {statusLabel[status] ?? 'Submit to Blockchain'}
+                {statusLabel[status] ?? 'Submit'}
             </Button>
 
             {error && (

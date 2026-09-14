@@ -1,10 +1,9 @@
 import { useCallback, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { ethers } from 'ethers';
 import { getSigner, getChainId } from '@/lib/ethers';
-import { productEventsApi } from '@/api/product-events.api';
 import config from '@/config';
 import { SMART_CONTRACT_ABI } from '@/config/abi';
+import { fetchWithAuth } from '@/lib/fetch';
 
 export type BlockchainSubmitStatus =
     | 'idle'
@@ -16,12 +15,8 @@ export type BlockchainSubmitStatus =
     | 'success'
     | 'error';
 
-interface UseBlockchainSubmitOptions {
-    invalidateKeys?: string[][];
-}
 
-export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
-    const queryClient = useQueryClient();
+export function useBlockchainSubmit() {
     const [status, setStatus] = useState<BlockchainSubmitStatus>('idle');
     const [error, setError] = useState<string | null>(null);
 
@@ -38,8 +33,18 @@ export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
                 }
 
                 // Get Data Hash
-                const hashRes = await productEventsApi.getEventHash(productEventId);
-                const { dataHash, messageHash } = hashRes.data.data;
+                const hashResponse = await fetchWithAuth(
+                    `${config.api.baseUrl}/api/product-events/${productEventId}/hash`,
+                );
+
+                if (!hashResponse.ok) {
+                    const errorResult = await hashResponse.json();
+                    throw new Error(errorResult.message ?? 'Failed to get product event hash');
+                }
+
+                const hashResult = await hashResponse.json();
+
+                const { dataHash, messageHash } = hashResult.data;
 
                 const signer = await getSigner();
 
@@ -71,13 +76,22 @@ export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
 
                 // Save Transaction Hash Off-Chain
                 setStatus('saving-tx');
-                await productEventsApi.saveTxHash(productEventId, tx.hash);
+                const saveResponse = await fetchWithAuth(
+                    `${config.api.baseUrl}/api/product-events/${productEventId}/save-txhash`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            txHash: tx.hash,
+                        }),
+                    },
+                );
 
-                // Invalidate Relevant Caches
-                if (options.invalidateKeys) {
-                    await Promise.all(
-                        options.invalidateKeys.map((key) => queryClient.invalidateQueries({ queryKey: key })),
-                    );
+                if (!saveResponse.ok) {
+                    const errorResult = await saveResponse.json();
+                    throw new Error(errorResult.message ?? 'Failed to save transaction hash');
                 }
 
                 setStatus('success');
@@ -105,7 +119,7 @@ export function useBlockchainSubmit(options: UseBlockchainSubmitOptions = {}) {
                 return false;
             }
         },
-        [queryClient, options.invalidateKeys],
+        [],
     );
 
     const reset = useCallback(() => {
