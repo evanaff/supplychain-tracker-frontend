@@ -1,6 +1,5 @@
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeft } from 'lucide-react';
@@ -16,13 +15,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { actorsApi } from '@/api/actors.api';
 import {
     createActorSchema,
     type CreateActorFormValues,
 } from './schemas/actor.schema';
 import config from '@/config';
 import { useAuth } from '@/hooks/useAuth';
+import { useState } from 'react';
+import { fetchWithAuth } from '@/lib/fetch';
 
 const ROLE_OPTIONS = ['GROWER', 'DISTRIBUTOR', 'RETAILER'] as const;
 
@@ -31,7 +31,7 @@ export default function CreateActorPage() {
 
     const navigate = useNavigate();
     const { isAdmin } = useAuth();
-    const queryClient = useQueryClient();
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const {
         register,
@@ -43,16 +43,36 @@ export default function CreateActorPage() {
         resolver: zodResolver(createActorSchema),
     });
 
-    const createMutation = useMutation({
-        mutationFn: (values: CreateActorFormValues) => actorsApi.create(values),
-        onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: ['actors'] });
-            navigate('/actors');
-        },
-    });
+    const onSubmit = async (
+        values: CreateActorFormValues,
+    ) => {
+        setSubmitError(null);
 
-    const onSubmit = (values: CreateActorFormValues) => {
-        createMutation.mutate(values);
+        try {
+            const response = await fetchWithAuth(
+                `${config.api.baseUrl}/api/actors`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(values),
+                },
+            );
+
+            if (!response.ok) {
+                const errorResult = await response.json();
+                throw new Error(errorResult.message ?? 'Failed to create actor');
+            }
+
+            navigate('/actors');
+        } catch (err) {
+            if (err instanceof Error) {
+                setSubmitError(err.message);
+            } else {
+                setSubmitError('Failed to create actor');
+            }
+        }
     };
 
     if (!isAdmin) {
@@ -139,22 +159,15 @@ export default function CreateActorPage() {
                                 </div>
                             </div>
 
-                            {createMutation.isError && (
+                            {submitError && (
                                 <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm font-medium border border-destructive/20">
-                                    {createMutation.error.message}
+                                    {submitError}
                                 </div>
                             )}
 
                             <div className="flex items-center justify-end gap-3 pt-4 border-t">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => navigate('/actors')}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={isSubmitting || createMutation.isPending}>
-                                    {createMutation.isPending ? 'Creating…' : 'Create'}
+                                <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Submitting…' : 'Submit'}
                                 </Button>
                             </div>
                         </form>

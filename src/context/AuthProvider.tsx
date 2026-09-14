@@ -1,5 +1,5 @@
 import { useEffect, useReducer, type ReactNode } from 'react';
-import type { AuthActor } from '@/types/auth.types';
+import type { AuthActor } from '@/types';
 import { AuthContext, authReducer, initialAuthState } from './AuthContext';
 
 interface AuthProviderProps {

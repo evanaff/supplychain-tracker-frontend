@@ -1,6 +1,5 @@
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeft } from 'lucide-react';
@@ -15,13 +14,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { locationsApi } from '@/api/locations.api';
 import {
     createLocationSchema,
     type CreateLocationFormValues,
 } from './schemas/location.schema';
 import config from '@/config';
 import { useAuth } from '@/hooks/useAuth';
+import { useState } from 'react';
+import { fetchWithAuth } from '@/lib/fetch';
 
 const ROLE_OPTIONS = ['GROWER', 'DISTRIBUTOR', 'RETAILER'] as const;
 
@@ -30,7 +30,7 @@ export default function CreateLocationPage() {
 
     const navigate = useNavigate();
     const { isAdmin } = useAuth();
-    const queryClient = useQueryClient();
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const {
         register,
@@ -41,16 +41,36 @@ export default function CreateLocationPage() {
         resolver: zodResolver(createLocationSchema),
     });
 
-    const createMutation = useMutation({
-        mutationFn: (values: CreateLocationFormValues) => locationsApi.create(values),
-        onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: ['locations'] });
-            navigate('/locations');
-        },
-    });
+    const onSubmit = async (
+        values: CreateLocationFormValues,
+    ) => {
+        setSubmitError(null);
 
-    const onSubmit = (values: CreateLocationFormValues) => {
-        createMutation.mutate(values);
+        try {
+            const response = await fetchWithAuth(
+                `${config.api.baseUrl}/api/locations`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(values),
+                },
+            );
+
+            if (!response.ok) {
+                const errorResult = await response.json();
+                throw new Error(errorResult.message ?? 'Failed to create location');
+            }
+
+            navigate('/locations');
+        } catch (err) {
+            if (err instanceof Error) {
+                setSubmitError(err.message);
+            } else {
+                setSubmitError('Failed to create location');
+            }
+        }
     };
 
     if (!isAdmin) {
@@ -78,8 +98,8 @@ export default function CreateLocationPage() {
                         <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} className="space-y-6">
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="col-span-2 space-y-2">
-                                    <Label htmlFor="gln">GLN (13 digits) <span className="text-destructive">*</span></Label>
-                                    <Input id="gln" placeholder="1234567890123" {...register('gln')} />
+                                    <Label htmlFor="gln">GLN (13 Digits) <span className="text-destructive">*</span></Label>
+                                    <Input id="gln" {...register('gln')} />
                                     {errors.gln && <p className="text-[13px] text-destructive font-medium">{errors.gln.message}</p>}
                                 </div>
                                 <div className="col-span-2 space-y-2">
@@ -134,22 +154,15 @@ export default function CreateLocationPage() {
                                 </div>
                             </div>
 
-                            {createMutation.isError && (
+                            {submitError && (
                                 <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm font-medium border border-destructive/20">
-                                    {createMutation.error.message}
+                                    {submitError}
                                 </div>
                             )}
 
                             <div className="flex items-center justify-end gap-3 pt-4 border-t">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => navigate('/locations')}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={isSubmitting || createMutation.isPending}>
-                                    {createMutation.isPending ? 'Creating…' : 'Create'}
+                                <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Submitting…' : 'Submit'}
                                 </Button>
                             </div>
                         </form>

@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect, type KeyboardEvent } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { locationsApi } from '@/api/locations.api';
+import React, { useState, useRef, useEffect } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Input } from '@/components/ui/input';
 import { Loader2, X, Search, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Location } from '@/types/location.types';
+import type { Location } from '@/types';
+import { fetchWithAuth } from '@/lib/fetch';
+import config from '@/config';
 
 interface LocationComboboxProps {
     id?: string;
@@ -24,34 +24,78 @@ export function LocationCombobox({
     const [inputValue, setInputValue] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [prevValue, setPrevValue] = useState(value);
-    const [prevLocationsLength, setPrevLocationsLength] = useState(0);
-
+    const [locations, setLocations] = useState<Location[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [fetchError, setFetchError] = useState<string | null>(null);
+    
     const containerRef = useRef<HTMLDivElement>(null);
-
+    const debouncedSearch = useDebounce(inputValue, 300);
+    const openDropdown = () => {
+        setIsOpen(true);
+        setIsLoading(true);
+    };
+    
     if (value !== prevValue) {
         setPrevValue(value);
         if (!value) {
-        setInputValue('');
+            setInputValue('');
         }
     }
 
-    const debouncedSearch = useDebounce(inputValue, 300);
+    useEffect(() => {
+        if (!isOpen) return;
 
-    const { data, isLoading } = useQuery({
-        queryKey: ['locations-search', debouncedSearch],
-        queryFn: () =>
-            locationsApi
-                .list({ search: debouncedSearch || undefined, limit: 10 })
-                .then((r) => r.data.data.locations),
-        enabled: isOpen,
-    });
+        let isActive = true;
 
-    const locations = data || [];
+        const fetchLocations = async () => {
+            try {
+                const params = new URLSearchParams({
+                    limit: '10',
+                });
 
-    if (locations.length !== prevLocationsLength) {
-        setPrevLocationsLength(locations.length);
-        setSelectedIndex(0);
-    }
+                if (debouncedSearch) {
+                    params.set('search', debouncedSearch);
+                }
+
+                const response = await fetchWithAuth(
+                    `${config.api.baseUrl}/api/locations?${params.toString()}`,
+                );
+
+                if (!response.ok) {
+                    const errorResult = await response.json();
+                    throw new Error(errorResult.message ?? 'Failed to load locations');
+                }
+
+                const result = await response.json();
+
+                if (!isActive) return;
+
+                setLocations(result.data.locations);
+                setSelectedIndex(0);
+                setFetchError(null);
+            } catch (err) {
+                if (!isActive) return;
+
+                setLocations([]);
+
+                if (err instanceof Error) {
+                    setFetchError(err.message);
+                } else {
+                    setFetchError('Failed to load locations');
+                }
+            } finally {
+                if (isActive) {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        fetchLocations();
+
+        return () => {
+            isActive = false;
+        };
+    }, [isOpen, debouncedSearch]);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -69,41 +113,11 @@ export function LocationCombobox({
         setIsOpen(false);
     };
 
-    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-        if (!isOpen) {
-            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                setIsOpen(true);
-            }
-            return;
-        }
-
-        switch (e.key) {
-            case 'ArrowDown':
-                e.preventDefault();
-                setSelectedIndex((prev) => (prev < locations.length - 1 ? prev + 1 : prev));
-                break;
-            case 'ArrowUp':
-                e.preventDefault();
-                setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0));
-                break;
-            case 'Enter':
-                e.preventDefault();
-                if (locations[selectedIndex]) {
-                    handleSelect(locations[selectedIndex]);
-                }
-                break;
-            case 'Escape':
-                e.preventDefault();
-                setIsOpen(false);
-                break;
-        }
-    };
-
     const clearSelection = (e: React.MouseEvent) => {
         e.stopPropagation();
         setInputValue('');
         onChange('');
-        setIsOpen(true);
+        openDropdown();
     };
 
     return (
@@ -116,11 +130,10 @@ export function LocationCombobox({
                     value={inputValue}
                     onChange={(e) => {
                         setInputValue(e.target.value);
-                        setIsOpen(true);
+                        openDropdown();
                         onChange('');
                     }}
-                    onFocus={() => setIsOpen(true)}
-                    onKeyDown={handleKeyDown}
+                    onFocus={openDropdown}
                     className={cn('pr-8', error && 'border-destructive focus-visible:ring-destructive')}
                     autoComplete="off"
                 />
@@ -145,9 +158,17 @@ export function LocationCombobox({
             {isOpen && (
                 <div className="absolute z-50 w-full mt-1 bg-popover text-popover-foreground rounded-md border shadow-md max-h-[168px] overflow-y-auto animate-in fade-in-0 zoom-in-95">
                     {isLoading && locations.length === 0 ? (
-                        <div className="p-4 text-center text-sm text-muted-foreground">Searching...</div>
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                            Searching...
+                        </div>
+                    ) : fetchError ? (
+                        <div className="p-4 text-center text-sm text-destructive">
+                            {fetchError}
+                        </div>
                     ) : locations.length === 0 ? (
-                        <div className="p-4 text-center text-sm text-muted-foreground">No locations found.</div>
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                            No locations found.
+                        </div>
                     ) : (
                         <ul className="p-1" role="listbox">
                             {locations.map((loc, index) => {

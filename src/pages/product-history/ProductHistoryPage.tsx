@@ -1,7 +1,6 @@
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
 import {
     ShieldCheck,
     ShieldX,
@@ -20,52 +19,103 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { ProductEventTimeline } from '@/components/shared/ProductEventTimeline';
 import { StatusBadge } from '@/components/shared/StatusBadge';
-
-import { productLotsApi } from '@/api/product-lots.api';
 import config from '@/config';
-
-import type { VerificationResult } from '@/types/product-event.types';
+import type { ProductHistory, VerificationResult } from '@/types';
 
 export default function ProductHistoryPage() {
     useDocumentTitle(`Product History - ${config.app.name}`);
 
     const { id } = useParams<{ id: string }>();
+    const [data, setData] = useState<ProductHistory | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] =useState<string | null>(null);
+    const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [verificationError, setVerificationError] = useState<string | null>(null);
+    
+    useEffect(() => {
+        if (!id) return;
 
-    const [verificationResult, setVerificationResult] =
-        useState<VerificationResult | null>(null);
+        let isActive = true;
 
-    const {
-        data,
-        isLoading,
-        isError,
-        error,
-    } = useQuery({
-        queryKey: ['product-history', id],
-        queryFn: () =>
-            productLotsApi
-                .getHistory(id!)
-                .then((r) => r.data.data),
-        enabled: Boolean(id),
-    });
+        const fetchProductHistory = async () => {
+            try {
+                const response = await fetch(
+                    `${config.api.baseUrl}/api/product-lots/${id}`,
+                );
 
-    const verifyMutation = useMutation({
-        mutationFn: () =>
-            productLotsApi
-                .verify(id!)
-                .then((r) => r.data.data),
+                if (!response.ok) {
+                    const errorResult = await response.json();
+                    throw new Error(errorResult.message ?? 'Failed to load product history');
+                }
 
-        onSuccess: (result) => {
-            setVerificationResult(result);
-        },
-    });
+                const result = await response.json();
+
+                if (!isActive) return;
+
+                setData(result.data);
+                setError(null);
+            } catch (err) {
+                if (!isActive) return;
+
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError('Failed to load product history');
+                }
+            } finally {
+                if (isActive) {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        fetchProductHistory();
+
+        return () => {
+            isActive = false;
+        };
+    }, [id]);
+
+    const handleVerify = async () => {
+        if (!id) return;
+
+        setIsVerifying(true);
+        setVerificationError(null);
+
+        try {
+            const response = await fetch(
+                `${config.api.baseUrl}/api/product-lots/${id}/verify`,
+                {
+                    method: 'POST',
+                },
+            );
+
+            if (!response.ok) {
+                const errorResult = await response.json();
+                throw new Error(errorResult.message ?? 'Failed to verify product history');
+            }
+
+            const result = await response.json();
+
+            setVerificationResult(result.data);
+        } catch (err) {
+            if (err instanceof Error) {
+                setVerificationError(err.message);
+            } else {
+                setVerificationError('Failed to verify product history.');
+            }
+        } finally {
+            setIsVerifying(false);
+        }
+    };
 
     const pl = data?.productLot;
     const events = data?.productEvents ?? [];
 
     const referenceEvent = events[0];
 
-    const hasVerificationIssue =
-        verificationResult !== null &&
+    const hasVerificationIssue = verificationResult !== null &&
         (
             verificationResult.invalidEvents.length > 0 ||
             verificationResult.unrecordedEvents.length > 0 ||
@@ -75,24 +125,19 @@ export default function ProductHistoryPage() {
     const generateReportMailto = () => {
         if (!verificationResult || !pl) return '#';
 
-        const subject = encodeURIComponent(
-            'Blockchain Verification Issue Report',
-        );
+        const subject = encodeURIComponent('Blockchain Verification Issue Report');
 
-        const invalidEventsStr =
-            verificationResult.invalidEvents.length > 0
-                ? verificationResult.invalidEvents.join('\n')
-                : 'None';
+        const invalidEventsStr = verificationResult.invalidEvents.length > 0
+            ? verificationResult.invalidEvents.join('\n')
+            : 'None';
 
-        const unrecordedEventsStr =
-            verificationResult.unrecordedEvents.length > 0
-                ? verificationResult.unrecordedEvents.join('\n')
-                : 'None';
+        const unrecordedEventsStr = verificationResult.unrecordedEvents.length > 0
+            ? verificationResult.unrecordedEvents.join('\n')
+            : 'None';
 
-        const missingEventsStr =
-            verificationResult.missingEvents.length > 0
-                ? verificationResult.missingEvents.join('\n')
-                : 'None';
+        const missingEventsStr = verificationResult.missingEvents.length > 0
+            ? verificationResult.missingEvents.join('\n')
+            : 'None';
 
         const body = encodeURIComponent(`Hello,
 
@@ -112,22 +157,14 @@ ${missingEventsStr}
 
 Thank you.`);
 
-        return `mailto:evan22002@mail.unpad.ac.id?subject=${subject}&body=${body}`;
+        return `mailto:${config.report.email}?subject=${subject}&body=${body}`;
     };
 
     return (
         <>
             <meta
                 name="description"
-                content={
-                    pl
-                        ? `Product history for lot ${pl.lotNumber} - ${
-                            pl.product?.varietyName ??
-                            pl.product?.gtin ??
-                            '-'
-                        }. View full supply chain journey and blockchain verification.`
-                        : 'View supply chain product history and blockchain verification.'
-                }
+                content={'View supply chain product history and blockchain verification'}
             />
 
             <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -162,7 +199,7 @@ Thank you.`);
 
                             <Skeleton className="h-64 w-full rounded-xl" />
                         </div>
-                    ) : isError || !pl ? (
+                    ) : error || !pl ? (
                         <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-6 flex gap-3">
                             <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
 
@@ -172,8 +209,7 @@ Thank you.`);
                                 </p>
 
                                 <p className="text-sm text-muted-foreground mt-1">
-                                    {error?.message ||
-                                        'This product lot ID does not exist or has been removed.'}
+                                    {error ?? 'This product lot ID does not exist or has been removed.'}
                                 </p>
                             </div>
                         </div>
@@ -286,20 +322,16 @@ Thank you.`);
                                         variant="outline"
                                         size="sm"
                                         className="gap-2"
-                                        onClick={() =>
-                                            verifyMutation.mutate()
-                                        }
-                                        disabled={
-                                            verifyMutation.isPending
-                                        }
+                                        onClick={() => void handleVerify() }
+                                        disabled={isVerifying}
                                     >
-                                        {verifyMutation.isPending ? (
+                                        {isVerifying ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
                                         ) : (
                                             <ShieldCheck className="h-4 w-4" />
                                         )}
 
-                                        {verifyMutation.isPending
+                                        {isVerifying
                                             ? 'Verifying…'
                                             : 'Verify Product History'}
                                     </Button>
@@ -348,8 +380,13 @@ Thank you.`);
                                         </div>
                                     </div>
 
+                                    {verificationError && (
+                                        <p className="text-sm text-destructive">
+                                            {verificationError}
+                                        </p>
+                                    )}
                                     {!verificationResult &&
-                                        !verifyMutation.isPending && (
+                                        !isVerifying && (
                                             <p className="text-sm text-muted-foreground">
                                                 Click "Verify Product
                                                 History" to check the
@@ -365,11 +402,7 @@ Thank you.`);
                                                 {/* Valid */}
                                                 <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-3">
                                                     <p className="text-2xl font-bold text-emerald-700">
-                                                        {
-                                                            verificationResult
-                                                                .validEvents
-                                                                .length
-                                                        }
+                                                        {verificationResult.validEvents.length}
                                                     </p>
 
                                                     <p className="text-xs text-emerald-600 mt-1">
@@ -380,11 +413,7 @@ Thank you.`);
                                                 {/* Invalid */}
                                                 <div className="rounded-lg bg-red-50 border border-red-200 p-3">
                                                     <p className="text-2xl font-bold text-red-700">
-                                                        {
-                                                            verificationResult
-                                                                .invalidEvents
-                                                                .length
-                                                        }
+                                                        {verificationResult.invalidEvents.length}
                                                     </p>
 
                                                     <p className="text-xs text-red-600 mt-1">
@@ -395,11 +424,7 @@ Thank you.`);
                                                 {/* Missing */}
                                                 <div className="rounded-lg bg-amber-50 border border-amber-200 p-3">
                                                     <p className="text-2xl font-bold text-amber-700">
-                                                        {
-                                                            verificationResult
-                                                                .missingEvents
-                                                                .length
-                                                        }
+                                                        {verificationResult.missingEvents.length}
                                                     </p>
 
                                                     <p className="text-xs text-amber-600 mt-1">
@@ -410,11 +435,7 @@ Thank you.`);
                                                 {/* Unrecorded */}
                                                 <div className="rounded-lg bg-gray-50 border border-gray-200 p-3">
                                                     <p className="text-2xl font-bold text-gray-700">
-                                                        {
-                                                            verificationResult
-                                                                .unrecordedEvents
-                                                                .length
-                                                        }
+                                                        {verificationResult.unrecordedEvents.length}
                                                     </p>
 
                                                     <p className="text-xs text-gray-600 mt-1">
@@ -453,8 +474,7 @@ Thank you.`);
                                                     <Button
                                                         className="bg-red-600 hover:bg-red-700 text-white border border-red-700 shadow-sm font-semibold gap-3 h-10 px-5 transition-colors"
                                                         onClick={() => {
-                                                            window.location.href =
-                                                                generateReportMailto();
+                                                            window.location.href = generateReportMailto();
                                                         }}
                                                     >
                                                         <AlertTriangle className="h-5 w-5" />

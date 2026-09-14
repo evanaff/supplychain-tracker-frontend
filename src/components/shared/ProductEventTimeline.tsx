@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { formatDateTime } from '@/lib/utils';
 import { StatusBadge } from '@/components/shared/StatusBadge';
-import type { ProductEvent, VerificationResult } from '@/types/product-event.types';
+import type { ProductEvent, VerificationResult } from '@/types';
 import {
     Clock,
     MapPin,
@@ -26,10 +26,10 @@ interface ProductEventTimelineProps {
 }
 
 const activityConfig: Record<SupplyChainActivity, { icon: LucideIcon; color: string; mutedColor: string }> = {
-  HARVESTING: { icon: Sprout, color: 'border-green-500 text-green-600', mutedColor: 'border-green-300/50 text-green-400/50' },
-  SHIPPING: { icon: Truck, color: 'border-blue-500 text-blue-600', mutedColor: 'border-blue-300/50 text-blue-400/50' },
-  RECEIVING: { icon: Package, color: 'border-amber-500 text-amber-600', mutedColor: 'border-amber-300/50 text-amber-400/50' },
-  SELLING: { icon: Store, color: 'border-violet-500 text-violet-600', mutedColor: 'border-violet-300/50 text-violet-400/50' },
+    HARVESTING: { icon: Sprout, color: 'border-green-500 text-green-600', mutedColor: 'border-green-300/50 text-green-400/50' },
+    SHIPPING: { icon: Truck, color: 'border-blue-500 text-blue-600', mutedColor: 'border-blue-300/50 text-blue-400/50' },
+    RECEIVING: { icon: Package, color: 'border-amber-500 text-amber-600', mutedColor: 'border-amber-300/50 text-amber-400/50' },
+    SELLING: { icon: Store, color: 'border-violet-500 text-violet-600', mutedColor: 'border-violet-300/50 text-violet-400/50' },
 };
 
 const defaultConfig = { icon: Package, color: 'border-gray-500 text-gray-600', mutedColor: 'border-gray-300/50 text-gray-400/50' };

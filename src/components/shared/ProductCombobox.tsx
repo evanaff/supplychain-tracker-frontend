@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect, type KeyboardEvent } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { productsApi } from '@/api/products.api';
+import React, { useState, useRef, useEffect } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Input } from '@/components/ui/input';
 import { Loader2, X, Search, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Product } from '@/types/product.types';
+import type { Product } from '@/types';
+import { fetchWithAuth } from '@/lib/fetch';
+import config from '@/config';
 
 interface ProductComboboxProps {
     id?: string;
@@ -24,34 +24,79 @@ export function ProductCombobox({
     const [inputValue, setInputValue] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [prevValue, setPrevValue] = useState(value);
-    const [prevProductsLength, setPrevProductsLength] = useState(0);
-
+    const [products, setProducts] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [fetchError, setFetchError] = useState<string | null>(null);
+    
     const containerRef = useRef<HTMLDivElement>(null);
-
-        if (value !== prevValue) {
-                setPrevValue(value);
-                if (!value) {
-                setInputValue('');
-                }
-        }
-
     const debouncedSearch = useDebounce(inputValue, 300);
+    const openDropdown = () => {
+        setIsOpen(true);
+        setIsLoading(true);
+        setFetchError(null);
+    };
 
-    const { data, isLoading } = useQuery({
-        queryKey: ['products-search', debouncedSearch],
-        queryFn: () =>
-            productsApi
-                .list({ search: debouncedSearch || undefined, limit: 10 })
-                .then((r) => r.data.data.products),
-        enabled: isOpen,
-    });
-
-    const products = data || [];
-
-    if (products.length !== prevProductsLength) {
-        setPrevProductsLength(products.length);
-        setSelectedIndex(0);
+    if (value !== prevValue) {
+        setPrevValue(value);
+        if (!value) {
+            setInputValue('');
+        }
     }
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        let isActive = true;
+
+        const fetchProducts = async () => {
+            try {
+                const params = new URLSearchParams({
+                    limit: '10',
+                });
+
+                if (debouncedSearch) {
+                    params.set('search', debouncedSearch);
+                }
+
+                const response = await fetchWithAuth(
+                    `${config.api.baseUrl}/api/products?${params.toString()}`,
+                );
+
+                if (!response.ok) {
+                    const errorResult = await response.json();
+                    throw new Error(errorResult.message ?? 'Failed to load products');
+                }
+
+                const result = await response.json();
+
+                if (!isActive) return;
+
+                setProducts(result.data.products);
+                setSelectedIndex(0);
+                setFetchError(null);
+            } catch (err) {
+                if (!isActive) return;
+
+                setProducts([]);
+
+                if (err instanceof Error) {
+                    setFetchError(err.message);
+                } else {
+                    setFetchError('Failed to load products');
+                }
+            } finally {
+                if (isActive) {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        fetchProducts();
+
+        return () => {
+            isActive = false;
+        };
+    }, [isOpen, debouncedSearch]);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -69,41 +114,11 @@ export function ProductCombobox({
         setIsOpen(false);
     };
 
-    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-        if (!isOpen) {
-            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                setIsOpen(true);
-            }
-            return;
-        }
-
-        switch (e.key) {
-            case 'ArrowDown':
-                e.preventDefault();
-                setSelectedIndex((prev) => (prev < products.length - 1 ? prev + 1 : prev));
-                break;
-            case 'ArrowUp':
-                e.preventDefault();
-                setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0));
-                break;
-            case 'Enter':
-                e.preventDefault();
-                if (products[selectedIndex]) {
-                    handleSelect(products[selectedIndex]);
-                }
-                break;
-            case 'Escape':
-                e.preventDefault();
-                setIsOpen(false);
-                break;
-        }
-    };
-
     const clearSelection = (e: React.MouseEvent) => {
         e.stopPropagation();
         setInputValue('');
         onChange('');
-        setIsOpen(true);
+        openDropdown();
     };
 
     return (
@@ -116,11 +131,10 @@ export function ProductCombobox({
                     value={inputValue}
                     onChange={(e) => {
                         setInputValue(e.target.value);
-                        setIsOpen(true);
-                        onChange(''); // Clear the GTIN as soon as they type to ensure they select a valid product
+                        openDropdown();
+                        onChange(''); 
                     }}
-                    onFocus={() => setIsOpen(true)}
-                    onKeyDown={handleKeyDown}
+                    onFocus={openDropdown}
                     className={cn('pr-8', error && 'border-destructive focus-visible:ring-destructive')}
                     autoComplete="off"
                 />
@@ -145,9 +159,17 @@ export function ProductCombobox({
             {isOpen && (
                 <div className="absolute z-50 w-full mt-1 bg-popover text-popover-foreground rounded-md border shadow-md max-h-[168px] overflow-y-auto animate-in fade-in-0 zoom-in-95">
                     {isLoading && products.length === 0 ? (
-                        <div className="p-4 text-center text-sm text-muted-foreground">Searching...</div>
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                            Searching...
+                        </div>
+                    ) : fetchError ? (
+                        <div className="p-4 text-center text-sm text-destructive">
+                            {fetchError}
+                        </div>
                     ) : products.length === 0 ? (
-                        <div className="p-4 text-center text-sm text-muted-foreground">No products found.</div>
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                            No products found.
+                        </div>
                     ) : (
                         <ul className="p-1" role="listbox">
                             {products.map((product, index) => {

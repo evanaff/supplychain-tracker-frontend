@@ -1,7 +1,6 @@
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Copy, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,69 +19,145 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { BlockchainSubmitButton } from '@/components/shared/BlockchainSubmitButton';
 import { RoleGuard } from '@/components/shared/RoleGuard';
 import { ErrorState } from '@/components/shared/ErrorState';
-import { productLotsApi } from '@/api/product-lots.api';
-import { productEventsApi } from '@/api/product-events.api';
 import { LocationCombobox } from '@/components/shared/LocationCombobox';
 import { formatDateTime } from '@/lib/utils';
 import config from '@/config';
 import type { SupplyChainActivity } from '@/types';
 import { QRCodeCanvas } from 'qrcode.react';
+import { fetchWithAuth } from '@/lib/fetch';
+import type { ProductHistory } from '@/types';
 
 export default function ProductLotDetailPage() {
     useDocumentTitle(`Product Lot Detail - ${config.app.name}`);
 
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
+    // const queryClient = useQueryClient();
 
     const [destinationGln, setDestinationGln] = useState('');
     const [actionError, setActionError] = useState<string | null>(null);
     const [selectedPendingEventId, setSelectedPendingEventId] = useState<string>('');
-
     const [selectedActivity, setSelectedActivity] = useState<SupplyChainActivity | ''>('');
+    const [history, setHistory] = useState<ProductHistory | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [retryCount, setRetryCount] = useState(0);
+    const [completedRequestKey, setCompletedRequestKey] = useState<string | null>(null);
+    const [isCreatingEvent, setIsCreatingEvent] = useState(false);
 
-    const { data: history, isLoading, isError, error } = useQuery({
-        queryKey: ['product-lot', id],
-        queryFn: () => productLotsApi.getHistory(id!).then((r) => r.data.data),
-        enabled: Boolean(id),
-    });
+    const requestKey = [
+        id,
+        retryCount,
+    ].join('|');
+    const isLoading = completedRequestKey !== requestKey;
 
-    const createEventMutation = useMutation({
-        mutationFn: async (payload: { activity: SupplyChainActivity; destinationGln?: string }) => {
-            return productEventsApi.create({
-                productLotId: id!,
-                supplyChainActivity: payload.activity,
-                destinationLocationGln: payload.destinationGln,
-            });
-        },
-        onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: ['product-lot', id] });
-            void queryClient.invalidateQueries({ queryKey: ['product-history', id] });
-            setActionError(null);
+    useEffect(() => {
+        if (!id) return;
+
+        let isActive = true;
+
+        const fetchProductHistory = async () => {
+            try {
+                const response = await fetchWithAuth(
+                    `${config.api.baseUrl}/api/product-lots/${id}`,
+                );
+
+                if (!response.ok) {
+                    const errorResult = await response.json();
+                    throw new Error(errorResult.message ?? 'Failed to load product lot');
+                }
+
+                const result = await response.json();
+
+                if (!isActive) return;
+
+                setHistory(result.data);
+                setError(null);
+            } catch (err) {
+                if (!isActive) return;
+
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError('Failed to load product lot');
+                }
+            } finally {
+                if (isActive) {
+                    setCompletedRequestKey(requestKey);
+                }
+            }
+        };
+
+        fetchProductHistory();
+
+        return () => {
+            isActive = false;
+        };
+    }, [id, retryCount, requestKey]);
+
+    const handleCreateEvent = async () => {
+        if (!id || !selectedActivity) return;
+
+        setIsCreatingEvent(true);
+        setActionError(null);
+
+        try {
+            const response = await fetchWithAuth(
+                `${config.api.baseUrl}/api/product-events`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':
+                            'application/json',
+                    },
+                    body: JSON.stringify({
+                        productLotId: id,
+                        supplyChainActivity:
+                            selectedActivity,
+                        destinationLocationGln:
+                            selectedActivity === 'SHIPPING'
+                                ? destinationGln
+                                : undefined,
+                    }),
+                },
+            );
+
+            if (!response.ok) {
+                const errorResult = await response.json();
+                throw new Error(errorResult.message ?? 'Failed to create event');
+            }
+
             setSelectedActivity('');
             setDestinationGln('');
-        },
-        onError: (err: Error) => {
-            setActionError(err.message ?? 'Failed to create event.');
-        },
-    });
+
+            setRetryCount(
+                (value) => value + 1,
+            );
+        } catch (err) {
+            if (err instanceof Error) {
+                setActionError(err.message);
+            } else {
+                setActionError('Failed to create event');
+            }
+        } finally {
+            setIsCreatingEvent(false);
+        }
+    };
 
     const productHistoryUrl = `${window.location.origin}/product-history/${id}`;
 
-    if (isError) {
+    if (error) {
         return (
             <ErrorState
                 variant="not-found"
                 title="Product Lot not found"
-                description={error?.message}
+                description={error}
                 action={<Button variant="outline" onClick={() => navigate('/product-lots')}>Back</Button>}
             />
         );
     }
 
     const pendingEvents = history?.productEvents.filter((e) => !e.txHash) ?? [];
-    const activePendingEventId =
-        pendingEvents.length === 1
+    const activePendingEventId = pendingEvents.length === 1
         ? pendingEvents[0].id
         : selectedPendingEventId;
     
@@ -297,14 +372,14 @@ export default function ProductLotDetailPage() {
 
                                             <Button
                                                 className="w-full"
-                                                onClick={() => createEventMutation.mutate({ activity: selectedActivity as SupplyChainActivity, destinationGln })}
+                                                onClick={() => void handleCreateEvent()}
                                                 disabled={
-                                                !selectedActivity ||
-                                                createEventMutation.isPending ||
-                                                (selectedActivity === 'SHIPPING' && !destinationGln)
+                                                    !selectedActivity ||
+                                                    isCreatingEvent ||
+                                                    (selectedActivity === 'SHIPPING' && !destinationGln)
                                                 }
                                             >
-                                                {createEventMutation.isPending ? 'Recording…' : 'Record'}
+                                                {isCreatingEvent ? 'Recording…' : 'Record'}
                                             </Button>
                                         </div>
 
@@ -337,10 +412,11 @@ export default function ProductLotDetailPage() {
                                                     productEventId={activePendingEventId}
                                                     productLotId={history?.productLot.id}
                                                     disabled={!activePendingEventId || !history?.productLot.id}
-                                                    invalidateKeys={[
-                                                        ['product-lot', id!],
-                                                        ['product-history', id!],
-                                                    ]}
+                                                    onSuccess={() =>
+                                                        setRetryCount(
+                                                            (value) => value + 1,
+                                                        )
+                                                    }
                                                 />
                                             </div>
                                             </div>

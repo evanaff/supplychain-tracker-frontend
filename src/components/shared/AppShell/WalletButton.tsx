@@ -10,8 +10,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
 import { useWallet } from '@/hooks/useWallet';
-import { authApi } from '@/api/auth.api';
 import { shortenAddress } from '@/lib/utils';
+import config from '@/config';
 
 export function WalletButton() {
     const { actor, clearAuth, refreshToken } = useAuth();
@@ -21,7 +21,22 @@ export function WalletButton() {
     const handleLogout = async () => {
         try {
             if (refreshToken) {
-                await authApi.logout({ refreshToken });
+                const response = await fetch(
+                    `${config.api.baseUrl}/api/auth/logout`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            refreshToken,
+                        }),
+                    },
+                );
+
+                if (!response.ok) {
+                    throw new Error('Failed to logout');
+                }
             }
         } catch {
             // logout

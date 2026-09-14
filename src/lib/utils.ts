@@ -1,6 +1,6 @@
 import config from '@/config';
-import type { SiweMessagePayload } from '@/types/auth.types';
-import type { SupplyChainActivity } from '@/types/index';
+import type { SiweMessagePayload } from '@/types';
+import type { SupplyChainActivity } from '@/types';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -56,16 +56,6 @@ export function activityColorClass(activity: SupplyChainActivity | 'CREATED'): s
         default:
             return '';
     }
-}
-
-export function capitalise(str: string): string {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
-
-export function truncate(str: string, maxLength: number): string {
-    if (str.length <= maxLength) return str;
-    return str.slice(0, maxLength) + '…';
 }
 
 export function cn(...inputs: ClassValue[]): string {

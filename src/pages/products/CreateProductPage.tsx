@@ -1,7 +1,6 @@
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeft, X } from 'lucide-react';
@@ -9,18 +8,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { productsApi } from '@/api/products.api';
 import { createProductSchema, type CreateProductFormValues } from './schemas/product.schema';
 import config from '@/config';
 import { useAuth } from '@/hooks/useAuth';
+import { fetchWithAuth } from '@/lib/fetch';
 
 export default function CreateProductPage() {
     useDocumentTitle(`Add Product - ${config.app.name}`);
 
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
     const { isAdmin } = useAuth();
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const {
         register,
@@ -31,23 +30,40 @@ export default function CreateProductPage() {
         resolver: zodResolver(createProductSchema),
     });
 
-    const createMutation = useMutation({
-        mutationFn: (values: CreateProductFormValues) => {
+    const onSubmit = async (
+        values: CreateProductFormValues,
+    ) => {
+        setSubmitError(null);
+
+        try {
             const formData = new FormData();
+
             formData.append('gtin', values.gtin);
             formData.append('varietyName', values.varietyName);
             formData.append('unitOfMeasure', values.unitOfMeasure);
             formData.append('image', values.image[0]);
-            return productsApi.create(formData);
-        },
-        onSuccess: () => {
-            void queryClient.invalidateQueries({ queryKey: ['products'] });
-            navigate('/products');
-        },
-    });
 
-    const onSubmit = (values: CreateProductFormValues) => {
-        createMutation.mutate(values);
+            const response = await fetchWithAuth(
+                `${config.api.baseUrl}/api/products`,
+                {
+                    method: 'POST',
+                    body: formData,
+                },
+            );
+
+            if (!response.ok) {
+                const errorResult = await response.json();
+                throw new Error(errorResult.message ?? 'Failed to create product');
+            }
+
+            navigate('/products');
+        } catch (err) {
+            if (err instanceof Error) {
+                setSubmitError(err.message);
+            } else {
+                setSubmitError('Failed to create product');
+            }
+        }
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,10 +111,9 @@ export default function CreateProductPage() {
                         <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} className="space-y-6">
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="col-span-2 sm:col-span-1 space-y-2">
-                                    <Label htmlFor="gtin">GTIN <span className="text-destructive">*</span></Label>
+                                    <Label htmlFor="gtin">GTIN (13 Digits)<span className="text-destructive">*</span></Label>
                                     <Input
                                         id="gtin"
-                                        placeholder="1234567890123"
                                         {...register('gtin')}
                                     />
                                     {errors.gtin && (
@@ -116,7 +131,7 @@ export default function CreateProductPage() {
 
                                 <div className="col-span-2 space-y-2">
                                     <Label htmlFor="varietyName">Variety Name <span className="text-destructive">*</span></Label>
-                                    <Input id="varietyName" placeholder="Fuji Apple" {...register('varietyName')} />
+                                    <Input id="varietyName" placeholder="Apple" {...register('varietyName')} />
                                     {errors.varietyName && (
                                         <p className="text-[13px] text-destructive font-medium">{errors.varietyName.message}</p>
                                     )}
@@ -164,22 +179,15 @@ export default function CreateProductPage() {
                                 </div>
                             </div>
 
-                            {createMutation.isError && (
+                            {submitError && (
                                 <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm font-medium border border-destructive/20">
-                                    {createMutation.error.message}
+                                    {submitError}
                                 </div>
                             )}
 
                             <div className="flex items-center justify-end gap-3 pt-4 border-t">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => navigate('/products')}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={isSubmitting || createMutation.isPending}>
-                                    {createMutation.isPending ? 'Creating…' : 'Create'}
+                                <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Submitting…' : 'Submit'}
                                 </Button>
                             </div>
                         </form>

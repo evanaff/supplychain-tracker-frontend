@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { SupplyChainActivity } from '@/types/index';
+import type { SupplyChainActivity } from '@/types';
 
 interface StatusBadgeProps {
     activity: SupplyChainActivity | 'CREATED';

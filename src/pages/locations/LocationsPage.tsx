@@ -1,7 +1,6 @@
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,13 +24,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SearchBar } from '@/components/shared/SearchBar';
 import { Pagination } from '@/components/shared/Pagination';
 import { ErrorStateWithRetry } from '@/components/shared/ErrorState';
-import { locationsApi } from '@/api/locations.api';
 import { usePagination } from '@/hooks/usePagination';
 import { useDebounce } from '@/hooks/useDebounce';
-import type { AllowedRole } from '@/types/location.types';
+import type { Location } from '@/types';
 
 import config from '@/config';
 import { useAuth } from '@/hooks/useAuth';
+import { fetchWithAuth } from '@/lib/fetch';
 
 const FILTER_OPTIONS: Array<{ value: string; label: string }> = [
   { value: '', label: 'All roles' },
@@ -54,14 +53,85 @@ export default function LocationsPage() {
     const { page, limit, setPage } = usePagination();
     const [search, setSearch] = useState('');
     const [roleFilter, setRoleFilter] = useState<string>('');
+    const [locations, setLocations] = useState<Location[]>([]);
+    const [totalPages, setTotalPages] = useState(1);
+    const [error, setError] = useState<string | null>(null);
+    const [retryCount, setRetryCount] = useState(0);
+    const [completedRequestKey, setCompletedRequestKey] = useState<string | null>(null);
 
     const debouncedSearch = useDebounce(search, 300);
+    const requestKey = [
+        page,
+        limit,
+        debouncedSearch,
+        roleFilter,
+        retryCount,
+    ].join('|');
+    const isLoading = completedRequestKey !== requestKey;
 
-    const { data, isLoading, isError, error, refetch } = useQuery({
-        queryKey: ['locations', page, limit, debouncedSearch, roleFilter],
-        queryFn: () =>
-            locationsApi.list({ page, limit, search: debouncedSearch || undefined, filter: roleFilter as AllowedRole || undefined }).then((r) => r.data.data),
-    });
+    useEffect(() => {
+        let isActive = true;
+
+        const fetchLocations = async () => {
+            try {
+                const params = new URLSearchParams({
+                    page: String(page),
+                    limit: String(limit),
+                });
+
+                if (debouncedSearch) {
+                    params.set('search', debouncedSearch);
+                }
+
+                if (roleFilter) {
+                    params.set('filter', roleFilter);
+                }
+
+                const response = await fetchWithAuth(
+                    `${config.api.baseUrl}/api/locations?${params.toString()}`,
+                );
+
+                if (!response.ok) {
+                    const errorResult = await response.json();
+                    throw new Error(errorResult.message ?? 'Failed to load locations');
+                }
+
+                const result = await response.json();
+
+                if (!isActive) return;
+
+                setLocations(result.data.locations);
+                setTotalPages(result.data.pagination.totalPages);
+                setError(null);
+            } catch (err) {
+                if (!isActive) return;
+
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError('Failed to load locations');
+                }
+            } finally {
+                if (isActive) {
+                    setCompletedRequestKey(requestKey);
+                }
+            }
+        };
+
+        fetchLocations();
+
+        return () => {
+            isActive = false;
+        };
+    }, [
+        page,
+        limit,
+        debouncedSearch,
+        roleFilter,
+        retryCount,
+        requestKey,
+        isAdmin,
+    ]);
 
     if (!isAdmin) {
         return <Navigate to="/product-lots" replace />;
@@ -105,8 +175,8 @@ export default function LocationsPage() {
                 </Select>
                 </div>
 
-                {isError ? (
-                    <ErrorStateWithRetry onRetry={() => void refetch()} description={error?.message} />
+                {error ? (
+                    <ErrorStateWithRetry onRetry={() => setRetryCount((value) => value + 1)} description={error} />
                 ) : (
                     <div className="rounded-lg border bg-card">
                         <Table>
@@ -132,7 +202,7 @@ export default function LocationsPage() {
                                             <TableCell />
                                         </TableRow>
                                     ))
-                                    : data?.locations.map((loc) => (
+                                    : locations.map((loc) => (
                                         <TableRow key={loc.gln}>
                                             <TableCell className="font-mono text-xs text-muted-foreground">
                                                 {loc.gln}
@@ -158,7 +228,7 @@ export default function LocationsPage() {
 
                 <Pagination
                     page={page}
-                    totalPages={data?.pagination.totalPages ?? 1}
+                    totalPages={totalPages}
                     onPageChange={setPage}
                 />
             </div>
