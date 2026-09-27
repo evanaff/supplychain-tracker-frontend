@@ -30,9 +30,7 @@ export default function CreateProductPage() {
         resolver: zodResolver(createProductSchema),
     });
 
-    const onSubmit = async (
-        values: CreateProductFormValues,
-    ) => {
+    const onSubmit = async (values: CreateProductFormValues) => {
         setSubmitError(null);
 
         try {

@@ -14,7 +14,6 @@ interface BlockchainSubmitButtonProps {
 const statusLabel: Record<string, string> = {
     idle: 'Submit',
     'fetching-hash': 'Fetching hash…',
-    'waiting-signature': 'Waiting for signature…',
     submitting: 'Submitting transaction…',
     'waiting-confirmation': 'Waiting for confirmation…',
     'saving-tx': 'Saving record…',
@@ -56,12 +55,6 @@ export function BlockchainSubmitButton({
 
             {error && (
                 <p className="text-xs text-destructive">{error}</p>
-            )}
-
-            {status === 'waiting-signature' && (
-                <p className="text-xs text-muted-foreground">
-                    Check your wallet - a signature request is pending.
-                </p>
             )}
 
             {status === 'waiting-confirmation' && (

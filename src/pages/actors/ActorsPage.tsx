@@ -124,15 +124,7 @@ export default function ActorsPage() {
         return () => {
             isActive = false;
         };
-    }, [
-        page,
-        limit,
-        debouncedSearch,
-        roleFilter,
-        retryCount,
-        requestKey,
-        isAdmin,
-    ]);
+    }, [page, limit, debouncedSearch, roleFilter, retryCount, requestKey, isAdmin]);
 
     if (!isAdmin) {
         return <Navigate to="/product-lots" replace />;

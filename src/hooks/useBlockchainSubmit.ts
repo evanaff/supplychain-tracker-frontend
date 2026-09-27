@@ -8,7 +8,6 @@ import { fetchWithAuth } from '@/lib/fetch';
 export type BlockchainSubmitStatus =
     | 'idle'
     | 'fetching-hash'
-    | 'waiting-signature'
     | 'submitting'
     | 'waiting-confirmation'
     | 'saving-tx'
@@ -44,14 +43,9 @@ export function useBlockchainSubmit() {
 
                 const hashResult = await hashResponse.json();
 
-                const { dataHash, messageHash } = hashResult.data;
+                const { dataHash } = hashResult.data;
 
                 const signer = await getSigner();
-
-                // Generate Message Hash & Sign
-                setStatus('waiting-signature');
-                
-                const signature = await signer.signMessage(ethers.getBytes(messageHash));
 
                 // Submit to Contract
                 setStatus('submitting');
@@ -65,7 +59,6 @@ export function useBlockchainSubmit() {
                     productEventId,
                     productLotId,
                     dataHash,
-                    signature
                 );
 
                 setStatus('waiting-confirmation');
@@ -108,8 +101,6 @@ export function useBlockchainSubmit() {
                     message = 'The connected wallet is not registered as a product-event actor.';
                 } else if (err.reason && err.reason.includes('Product event already exists')) {
                     message = 'This product event has already been registered on the blockchain.';
-                } else if (err.reason && err.reason.includes('Invalid signature')) {
-                    message = 'Invalid signature';
                 } else if (err.message) {
                     message = err.message.length < 100 ? err.message : message;
                 }
@@ -134,12 +125,11 @@ export function useBlockchainSubmit() {
         error,
         isIdle: status === 'idle',
         isFetchingHash: status === 'fetching-hash',
-        isWaitingSignature: status === 'waiting-signature',
         isSubmitting: status === 'submitting',
         isWaitingConfirmation: status === 'waiting-confirmation',
         isSavingTx: status === 'saving-tx',
         isSuccess: status === 'success',
         isError: status === 'error',
-        isPending: ['fetching-hash', 'waiting-signature', 'submitting', 'waiting-confirmation', 'saving-tx'].includes(status),
+        isPending: ['fetching-hash', 'submitting', 'waiting-confirmation', 'saving-tx'].includes(status),
     };
 }

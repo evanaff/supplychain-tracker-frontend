@@ -43,9 +43,7 @@ export default function CreateActorPage() {
         resolver: zodResolver(createActorSchema),
     });
 
-    const onSubmit = async (
-        values: CreateActorFormValues,
-    ) => {
+    const onSubmit = async (values: CreateActorFormValues) => {
         setSubmitError(null);
 
         try {
