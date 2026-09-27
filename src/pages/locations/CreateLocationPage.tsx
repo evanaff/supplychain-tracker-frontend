@@ -41,9 +41,7 @@ export default function CreateLocationPage() {
         resolver: zodResolver(createLocationSchema),
     });
 
-    const onSubmit = async (
-        values: CreateLocationFormValues,
-    ) => {
+    const onSubmit = async (values: CreateLocationFormValues) => {
         setSubmitError(null);
 
         try {

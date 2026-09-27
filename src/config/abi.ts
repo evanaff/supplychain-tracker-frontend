@@ -47,11 +47,6 @@ export const SMART_CONTRACT_ABI = [
                 "internalType": "bytes32",
                 "name": "_dataHash",
                 "type": "bytes32"
-            },
-            {
-                "internalType": "bytes",
-                "name": "_signature",
-                "type": "bytes"
             }
         ],
         "name": "addProductEvent",
@@ -128,4 +123,4 @@ export const SMART_CONTRACT_ABI = [
         "stateMutability": "nonpayable",
         "type": "function"
     }
-];
+]

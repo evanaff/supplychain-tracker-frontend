@@ -115,7 +115,7 @@ export default function ProductLotsPage() {
 
                 if (!isActive) return;
 
-                setProductLots(result.data.productLots,);
+                setProductLots(result.data.productLots);
                 setTotalPages(result.data.pagination.totalPages);
                 setError(null);
             } catch (err) {
@@ -138,14 +138,7 @@ export default function ProductLotsPage() {
         return () => {
             isActive = false;
         };
-    }, [
-        page,
-        limit,
-        search,
-        statusFilter,
-        retryCount,
-        requestKey,
-    ]);
+    }, [page, limit, search, statusFilter, retryCount, requestKey]);
 
     const {
         register,
@@ -157,9 +150,7 @@ export default function ProductLotsPage() {
         resolver: zodResolver(CreateProductLotSchema),
     });
 
-    const onSubmit = async (
-        values: CreateProductLotFormValues,
-    ) => {
+    const onSubmit = async (values: CreateProductLotFormValues) => {
         setSubmitError(null);
 
         try {
