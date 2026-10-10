@@ -6,10 +6,10 @@ export function useAuth() {
     const { state, dispatch } = useAuthContext();
 
     const setAuth = useCallback(
-        (accessToken: string, refreshToken: string, actor: AuthActor) => {
+        (actor: AuthActor) => {
             dispatch({ 
                 type: 'SET_AUTH', 
-                payload: { accessToken, refreshToken, actor } 
+                payload: { actor } 
             });
         },
         [dispatch],
@@ -21,20 +21,8 @@ export function useAuth() {
         });
     }, [dispatch]);
 
-    const updateTokens = useCallback(
-        (accessToken: string, refreshToken: string) => {
-            dispatch({ 
-                type: 'UPDATE_TOKENS',
-                payload: { accessToken, refreshToken } 
-            });
-        },
-        [dispatch],
-    );
-
     return {
         actor: state.actor,
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
         role: state.actor?.role ?? null,
         isAdmin: state.actor?.role === 'ADMIN',
@@ -43,6 +31,5 @@ export function useAuth() {
         isRetailer: state.actor?.role === 'RETAILER',
         setAuth,
         clearAuth,
-        updateTokens,
     };
 }

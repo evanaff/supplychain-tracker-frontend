@@ -4,15 +4,11 @@ import type { AuthActor, AuthState } from '@/types';
 export type AuthAction =
     | {
         type: 'SET_AUTH';
-        payload: { accessToken: string; refreshToken: string; actor: AuthActor };
+        payload: { actor: AuthActor };
       }
     | { type: 'CLEAR_AUTH' }
-    | { type: 'UPDATE_TOKENS'; payload: { accessToken: string; refreshToken: string } };
-
 
 export const initialAuthState: AuthState = {
-    accessToken: null,
-    refreshToken: null,
     actor: null,
     isAuthenticated: false,
 };
@@ -21,20 +17,11 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
     switch (action.type) {
         case 'SET_AUTH':
             return {
-                ...state,
-                accessToken: action.payload.accessToken,
-                refreshToken: action.payload.refreshToken,
                 actor: action.payload.actor,
                 isAuthenticated: true,
             };
         case 'CLEAR_AUTH':
-            return { ...initialAuthState };
-        case 'UPDATE_TOKENS':
-            return {
-                ...state,
-                accessToken: action.payload.accessToken,
-                refreshToken: action.payload.refreshToken,
-            };
+            return initialAuthState;
         default:
             return state;
     }

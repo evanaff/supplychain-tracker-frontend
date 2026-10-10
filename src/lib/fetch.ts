@@ -1,22 +1,9 @@
 import config from '@/config';
-
-import {
-    getStoredAccessToken,
-    getStoredRefreshToken,
-    setModuleLevelTokens,
-} from '@/context/AuthProvider';
-
-interface Tokens {
-    accessToken: string;
-    refreshToken: string;
-}
+import type { AuthActor } from '@/types';
 
 interface AuthHandlers {
-    updateTokens: (
-        accessToken: string,
-        refreshToken: string,
-    ) => void;
     clearAuth: () => void;
+    setAuth: (actor: AuthActor) => void;
     navigate: (path: string) => void;
 }
 
@@ -26,79 +13,52 @@ export function setFetchAuthHandlers(handlers: AuthHandlers | null) {
     authHandlers = handlers;
 }
 
-let refreshPromise: Promise<Tokens> | null = null;
+interface RefreshResponse {
+    data?: {
+        actor?: AuthActor;
+    };
+}
 
-async function refreshTokens(): Promise<Tokens> {
-    if (refreshPromise) {
-        return refreshPromise;
-    }
+let refreshPromise: Promise<AuthActor> | null = null;
 
-    const refreshToken = getStoredRefreshToken();
-
-    if (!refreshToken) {
-        throw new Error('Refresh token not found');
-    }
-
-    refreshPromise = (async () => {
-        const response = await fetch(
-            `${config.api.baseUrl}/api/auth/refresh`,
-            {
-                method: 'POST',
-
-                headers: {
-                    'Content-Type': 'application/json',
+function refreshSession(): Promise<AuthActor> {
+    if (!refreshPromise) {
+        refreshPromise = (async () => {
+            const response = await fetch(
+                `${config.api.baseUrl}/api/auth/refresh`,
+                {
+                    method: 'POST',
+                    credentials: 'include',
                 },
+            );
 
-                body: JSON.stringify({
-                    refreshToken,
-                }),
-            },
-        );
+            if (!response.ok) {
+                throw new Error(
+                    `Refresh failed: ${response.status}`,
+                );
+            }
 
-        if (!response.ok) {
-            throw new Error('Failed to refresh token');
-        }
+            const result =  (await response.json()) as RefreshResponse;
 
-        const result = (await response.json()) as {
-            data: {
-                accessToken: string;
-                refreshToken: string;
-            };
-        };
+            if (!result.data?.actor) {
+                throw new Error('Actor missing from refresh response');
+            }
 
-        const {
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-        } = result.data;
-
-        if (!newAccessToken || !newRefreshToken) {
-            throw new Error('Invalid token refresh response');
-        }
-
-        setModuleLevelTokens(
-            newAccessToken,
-            newRefreshToken,
-        );
-
-        authHandlers?.updateTokens(
-            newAccessToken,
-            newRefreshToken,
-        );
-
-        return {
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-        };
-    })().finally(() => {
-        refreshPromise = null;
-    });
+            return result.data.actor;
+        })().finally(() => {
+            refreshPromise = null;
+        });
+    }
 
     return refreshPromise;
 }
 
-function handleSessionExpired() {
-    setModuleLevelTokens(null, null);
+let redirectingToLogin = false;
 
+function handleSessionExpired() {
+    if (redirectingToLogin) return;
+
+    redirectingToLogin = true;
     authHandlers?.clearAuth();
     authHandlers?.navigate('/login');
 }
@@ -107,33 +67,25 @@ export async function fetchWithAuth(
     input: RequestInfo | URL,
     init: RequestInit = {},
 ): Promise<Response> {
-    const accessToken = getStoredAccessToken();
-    const headers = new Headers(init.headers);
-
-    if (accessToken) {
-        headers.set('Authorization', `Bearer ${accessToken}`);
-    }
-
-    let response = await fetch(input, {
-        ...init,
-        headers,
-    });
+    const request = () => 
+        fetch(input, {
+            ...init,
+            credentials: 'include'
+        });
+    let response = await request();
 
     if (response.status !== 401) {
         return response;
     }
 
     try {
-        const { accessToken: newAccessToken } = await refreshTokens();
+        const actor = await refreshSession();
+        authHandlers?.setAuth(actor);
 
-        const retryHeaders = new Headers(init.headers);
-
-        retryHeaders.set('Authorization', `Bearer ${newAccessToken}`);
-
-        response = await fetch(input, {
-            ...init,
-            headers: retryHeaders,
-        });
+        response = await request();
+        if (response.status === 401) {
+            throw new Error("Session expired");
+        }
 
         return response;
     } catch (error) {

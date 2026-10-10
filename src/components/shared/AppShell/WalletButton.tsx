@@ -14,35 +14,26 @@ import { shortenAddress } from '@/lib/utils';
 import config from '@/config';
 
 export function WalletButton() {
-    const { actor, clearAuth, refreshToken } = useAuth();
+    const { actor, clearAuth } = useAuth();
     const { isCorrectChain, switchChain, chainId } = useWallet();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
-            if (refreshToken) {
-                const response = await fetch(
-                    `${config.api.baseUrl}/api/auth/logout`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            refreshToken,
-                        }),
-                    },
-                );
+            const response = await fetch(
+                `${config.api.baseUrl}/api/auth/logout`,
+                {
+                    method: 'POST',
+                    credentials: 'include'
+                },
+            );
 
-                if (!response.ok) {
-                    throw new Error('Failed to logout');
-                }
+            if (!response.ok) {
+                throw new Error('Failed to logout');
             }
-        } catch {
-            // logout
         } finally {
             clearAuth();
-            navigate('/login');
+            navigate('/login', { replace: true });
         }
     };
 
@@ -89,7 +80,7 @@ export function WalletButton() {
                         className="text-destructive focus:text-destructive gap-2"
                     >
                         <LogOut className="h-4 w-4" />
-                        Sign out
+                        Log out
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
