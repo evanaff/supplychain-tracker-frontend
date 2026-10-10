@@ -1,23 +1,21 @@
 // Auth
 export interface AuthActor {
-  address: string;
-  name: string;
-  role: Role;
+    address: string;
+    name: string;
+    role: Role;
 }
 
 export interface AuthState {
-  accessToken: string | null;
-  refreshToken: string | null;
-  actor: AuthActor | null;
-  isAuthenticated: boolean;
+    actor: AuthActor | null;
+    isAuthenticated: boolean;
 }
 
 export interface SiweMessagePayload {
-  domain: string;
-  address: string;
-  uri: string;
-  version: string;
-  chainId: number;
+    domain: string;
+    address: string;
+    uri: string;
+    version: string;
+    chainId: number;
 }
 
 // Location

@@ -77,6 +77,7 @@ export default function LoginPage() {
                 `${config.api.baseUrl}/api/auth/verify`,
                 {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -92,8 +93,8 @@ export default function LoginPage() {
             }
             const verifyResult = await verifyResponse.json();
 
-            const { accessToken, refreshToken, actor } = verifyResult.data;
-            setAuth(accessToken, refreshToken, actor as AuthActor);
+            const { actor } = verifyResult.data;
+            setAuth(actor as AuthActor);
             let redirectPath = '/';
             const userRole = actor.role;
             if (redirectPath === '/') {

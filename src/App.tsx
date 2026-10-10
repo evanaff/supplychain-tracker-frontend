@@ -33,30 +33,19 @@ function PageLoader() {
 
 export default function App() {
     const navigate = useNavigate();
-    const { clearAuth, updateTokens } = useAuth();
+    const { clearAuth, setAuth } = useAuth();
 
     useEffect(() => {
         setFetchAuthHandlers({
-            navigate: (path: string) =>
-                navigate(path),
-
-            clearAuth: () =>
-                clearAuth(),
-
-            updateTokens: (
-                accessToken: string,
-                refreshToken: string,
-            ) =>
-                updateTokens(
-                    accessToken,
-                    refreshToken,
-                ),
+            navigate: (path: string) => navigate(path),
+            clearAuth,
+            setAuth,
         });
 
         return () => {
             setFetchAuthHandlers(null);
         };
-    }, [navigate, clearAuth, updateTokens]);
+    }, [navigate, clearAuth, setAuth]);
 
     return (
         <Suspense fallback={<PageLoader />}>
