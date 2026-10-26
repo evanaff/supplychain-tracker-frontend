@@ -20,17 +20,13 @@ export function WalletButton() {
 
     const handleLogout = async () => {
         try {
-            const response = await fetch(
+            await fetch(
                 `${config.api.baseUrl}/api/auth/logout`,
                 {
                     method: 'POST',
                     credentials: 'include'
                 },
             );
-
-            if (!response.ok) {
-                throw new Error('Failed to logout');
-            }
         } finally {
             clearAuth();
             navigate('/login', { replace: true });
