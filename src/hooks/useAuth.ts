@@ -24,6 +24,7 @@ export function useAuth() {
     return {
         actor: state.actor,
         isAuthenticated: state.isAuthenticated,
+        isInitializing: state.isInitializing,
         role: state.actor?.role ?? null,
         isAdmin: state.actor?.role === 'ADMIN',
         isGrower: state.actor?.role === 'GROWER',

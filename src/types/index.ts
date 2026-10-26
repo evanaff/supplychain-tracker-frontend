@@ -8,6 +8,7 @@ export interface AuthActor {
 export interface AuthState {
     actor: AuthActor | null;
     isAuthenticated: boolean;
+    isInitializing: boolean;
 }
 
 export interface SiweMessagePayload {

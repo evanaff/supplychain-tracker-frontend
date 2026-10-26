@@ -7,10 +7,12 @@ export type AuthAction =
         payload: { actor: AuthActor };
       }
     | { type: 'CLEAR_AUTH' }
+    | { type: "FINISH_INITIALIZATION" };
 
 export const initialAuthState: AuthState = {
     actor: null,
     isAuthenticated: false,
+    isInitializing: true,
 };
 
 export function authReducer(state: AuthState, action: AuthAction): AuthState {
@@ -19,9 +21,19 @@ export function authReducer(state: AuthState, action: AuthAction): AuthState {
             return {
                 actor: action.payload.actor,
                 isAuthenticated: true,
+                isInitializing: false,
             };
         case 'CLEAR_AUTH':
-            return initialAuthState;
+            return {
+                actor: null,
+                isAuthenticated: false,
+                isInitializing: false,
+            };
+        case "FINISH_INITIALIZATION":
+            return {
+                ...state,
+                isInitializing: false,
+            };
         default:
             return state;
     }

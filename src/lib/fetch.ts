@@ -63,6 +63,10 @@ function handleSessionExpired() {
     authHandlers?.navigate('/login');
 }
 
+export function resetSessionRedirect() {
+    redirectingToLogin = false;
+}
+
 export async function fetchWithAuth(
     input: RequestInfo | URL,
     init: RequestInit = {},

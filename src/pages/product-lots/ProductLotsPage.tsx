@@ -297,12 +297,12 @@ export default function ProductLotsPage() {
                 />
             </div>
 
-            {/* Create Product Lot Dialog */}
+            {/* Add Product Lot Dialog */}
             {isGrower && (
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                     <DialogContent className="sm:max-w-sm">
                         <DialogHeader>
-                            <DialogTitle>Create Product Lot</DialogTitle>
+                            <DialogTitle>Add Product Lot</DialogTitle>
                         </DialogHeader>
                         <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} className="space-y-4">
                             <div className="space-y-1">

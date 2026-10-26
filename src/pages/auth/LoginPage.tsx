@@ -11,6 +11,7 @@ import { buildSiwePayload } from '@/lib/utils';
 import config from '@/config';
 import type { AuthActor } from '@/types';
 import logo from '@/assets/logo.svg';
+import { resetSessionRedirect } from '@/lib/fetch';
 
 type LoginStep = 'connect' | 'sign' | 'verifying';
 
@@ -95,6 +96,8 @@ export default function LoginPage() {
 
             const { actor } = verifyResult.data;
             setAuth(actor as AuthActor);
+            resetSessionRedirect();
+            
             let redirectPath = '/';
             const userRole = actor.role;
             if (redirectPath === '/') {
